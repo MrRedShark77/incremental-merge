@@ -6,7 +6,7 @@ var ticks = 0;
 var tab = 'Merges'
 
 const FORMULA = {
-    merge_effect: (x) => { return (x > 0)?E(3+3*ACHIEVEMENTS.effs[0].cur()).pow(x-1).mul(FORMULA.prestige_effect()):0 },
+    merge_effect: (x) => { return (x > 0)?E(3+3*ACHIEVEMENTS.effs[0].cur()).pow(x-1).mul(FORMULA.prestige_effect()).mul(FORMULA.energy_effect()):0 },
     dt_merges: () => {
         let sum = E(0)
         for (let i = 0; i < player.merges.length; i++) sum = sum.add(FORMULA.merge_effect(player.merges[i]))
@@ -20,14 +20,24 @@ const FORMULA = {
     },
     prestige_effect: () => { return player.prestige.stats.div(100).add(1) },
     prestige_gain: () => { return player.number.add(1).logBase(100).pow(3).mul(player.prestige.upgs.includes(11)?UPGRADE.prestige[11].cur():1) },
+    energy_effect: () => { return player.energy.stats.add(1).pow(0.5) },
 }
 
 const TABS = [
     'Merges',
     'Prestige',
+    'Energy',
     'Achievements',
     'Options',
 ]
+
+const TABS_UNL = {
+    'Merges': () => { return true },
+    'Prestige': () => { return true },
+    'Energy': () => { return player.energy.stats.gte(1) },
+    'Achievements': () => { return true },
+    'Options': () => { return true },
+}
 
 const UPGRADE = {
     merges: {
@@ -61,13 +71,13 @@ const UPGRADE = {
         },
     },
     prestige: {
-        row: 2,
+        row: 3,
         col: 1,
         11: {
             desc: 'Highest Merge Tier boost Prestige gain.',
             unl: () => { return true },
             cost: () => { return E(250) },
-            cur: () => { return E(player.bestMergeLevel).add(1).pow(1/8) },
+            cur: () => { return E(player.bestMergeLevel).add(1).pow(1/6) },
             curDesc: (x) => { return notate(x)+'x' },
         },
         12: {
@@ -75,7 +85,37 @@ const UPGRADE = {
             unl: () => { return player.prestige.upgs.includes(11) },
             cost: () => { return E(1000) },
         },
-    }
+        13: {
+            desc: 'Energy stats makes interval for Merges faster.',
+            unl: () => { return player.prestige.upgs.includes(12) & player.energy.stats.gte(1) },
+            cost: () => { return E(5000) },
+            cur: () => { return E(player.energy.stats).add(1).pow(1/5) },
+            curDesc: (x) => { return notate(x)+'x' },
+        },
+    },
+    energy: {
+        row: 3,
+        col: 1,
+        11: {
+            desc: 'Highest Merge Tier boost chance to gain Energy.',
+            unl: () => { return true },
+            cost: () => { return E(5) },
+            cur: () => { return E(player.bestMergeLevel).add(1).pow(1/5).toNumber() },
+            curDesc: (x) => { return notate(x)+'x' },
+        },
+        12: {
+            desc: 'Automatically buy Merge upgrades like interval "Add Merger".',
+            unl: () => { return player.energy.upgs.includes(11) },
+            cost: () => { return E(25) },
+        },
+        13: {
+            desc: 'Prestige stats boost Energy points gain.',
+            unl: () => { return player.energy.upgs.includes(12) & player.prestige.stats.gte(1) },
+            cost: () => { return E(100) },
+            cur: () => { return player.prestige.stats.add(1).log10().add(1).pow(0.75) },
+            curDesc: (x) => { return notate(x)+'x' },
+        },
+    },
 }
 
 const ACHIEVEMENTS = {
@@ -93,14 +133,10 @@ const ACHIEVEMENTS = {
 }
 
 function buyUPG(upg, id) {
-    switch (upg) {
-        case 'prestige':
-            let cost = UPGRADE[upg][id].cost()
-            if (player.prestige.points.gte(cost) & !player.prestige.upgs.includes(id)) {
-                player.prestige.points = player.prestige.points.sub(cost)
-                player.prestige.upgs.push(id)
-            }
-            break
+    let cost = UPGRADE[upg][id].cost()
+    if (player[upg].points.gte(cost) & !player[upg].upgs.includes(id)) {
+        player[upg].points = player[upg].points.sub(cost)
+        player[upg].upgs.push(id)
     }
 }
 
@@ -133,9 +169,15 @@ function mergeAll() {
         for (let i = 0; i < player.merges.length - 1; i++){
             for (let j = i+1; j < player.merges.length; j++){
                 if(player.merges[i] == player.merges[j] && player.merges[i] != 0 && player.merges[j] != 0){
-                    player.merges[i]++;
+                    let chance = Math.random() * 101
+                    if (chance <= (player.energy.upgs.includes(11)?UPGRADE.energy[11].cur():1)) {
+                        let gain = player.energy.upgs.includes(13)?UPGRADE.energy[13].cur():1
+                        player.energy.points = player.energy.points.add(gain)
+                        player.energy.stats = player.energy.stats.add(gain)
+                    }
+                    player.merges[i]++
                     if (player.merges[i] > player.bestMergeLevel) player.bestMergeLevel = player.merges[i]
-                    player.merges[j] = 0;
+                    player.merges[j] = 0
                     break;
                 }
             }

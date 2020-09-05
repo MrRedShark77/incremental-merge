@@ -38,6 +38,10 @@ button {
     font-size: 30px;
 }
 
+.tabbox.energy {
+    background-color: skyblue;
+}
+
 .upg {
     width: 200px;
     height: 125px;

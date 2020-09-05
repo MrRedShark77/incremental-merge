@@ -8,6 +8,7 @@ function loadVue() {
             notate,
             changeTab,
             buyUPG,
+            TABS_UNL,
             FORMULA,
             UPGRADE,
             TABS,

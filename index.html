@@ -16,7 +16,7 @@
         Number is getting <h2>{{ notate(FORMULA.dt_merges(),0) }}</h2>/s<br><br>
         <div class="table_center">
             <div v-for='s in TABS'>
-                <button class="tabbox" v-on:click='changeTab(s)'>{{ s }}</button>
+                <button class="tabbox" v-on:click='changeTab(s)' v-bind:class="{energy: s == 'Energy'}" v-if="TABS_UNL[s]()">{{ s }}</button>
             </div>
         </div><br><div>
             <div id='Merges'>
@@ -38,6 +38,13 @@
                 <br><br><div v-for='c in UPGRADE.prestige.col' class="table_center">
                     <div v-for='r in UPGRADE.prestige.row'>
                         <button class="upg prestige" v-on:click='buyUPG("prestige",c*10+r)' v-if='UPGRADE.prestige[c*10+r].unl()' v-bind:class='{closed: player.prestige.points.lt(UPGRADE.prestige[c*10+r].cost()) & !player.prestige.upgs.includes(c*10+r), bought: player.prestige.upgs.includes(c*10+r)}'>{{ UPGRADE.prestige[c*10+r].desc }}<br>Cost: {{ notate(UPGRADE.prestige[c*10+r].cost(),0) }}<br><span v-if='UPGRADE.prestige[c*10+r].cur'>Currently: {{ UPGRADE.prestige[c*10+r].curDesc(UPGRADE.prestige[c*10+r].cur()) }}</span></button>
+                    </div>
+                </div>
+            </div><div id="Energy" style="display: none;">
+                You have <h2>{{ notate(player.energy.points,0) }} [{{ notate(player.energy.stats,0) }}]</h2> Energy Points, which multiples merges production by {{ notate(FORMULA.energy_effect()) }}
+                <br><br><div v-for='c in UPGRADE.energy.col' class="table_center">
+                    <div v-for='r in UPGRADE.energy.row'>
+                        <button class="upg prestige" v-on:click='buyUPG("energy",c*10+r)' v-if='UPGRADE.energy[c*10+r].unl()' v-bind:class='{closed: player.energy.points.lt(UPGRADE.energy[c*10+r].cost()) & !player.energy.upgs.includes(c*10+r), bought: player.energy.upgs.includes(c*10+r)}'>{{ UPGRADE.energy[c*10+r].desc }}<br>Cost: {{ notate(UPGRADE.energy[c*10+r].cost(),0) }}<br><span v-if='UPGRADE.energy[c*10+r].cur'>Currently: {{ UPGRADE.energy[c*10+r].curDesc(UPGRADE.energy[c*10+r].cur()) }}</span></button>
                     </div>
                 </div>
             </div><div id="Achievements" style="display: none;">

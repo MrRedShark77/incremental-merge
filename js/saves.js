@@ -10,10 +10,14 @@ function ex(x){
 }
 
 function calc(dt) {
-    if (ticks < UPGRADE.merges[1].cur() & (FORMULA.merges_have() < 20 || player.prestige.upgs.includes(12))) ticks += dt
+    if (ticks < UPGRADE.merges[1].cur() & (FORMULA.merges_have() < 20 || player.prestige.upgs.includes(12))) ticks += dt * (player.prestige.upgs.includes(13)?UPGRADE.prestige[13].cur().toNumber():1)
     if (ticks >= UPGRADE.merges[1].cur()) {
         addMerge()
         if (player.prestige.upgs.includes(12)) mergeAll()
+        if (player.energy.upgs.includes(12)) {
+            UPGRADE.merges[0].buy()
+            UPGRADE.merges[1].buy()
+        }
         ticks = 0
     }
     player.number = player.number.add(FORMULA.dt_merges().mul(dt / 1000))
@@ -23,6 +27,11 @@ function wipe() {
     player = {
         number: E(0),
         prestige: {
+            points: E(0),
+            stats: E(0),
+            upgs: [],
+        },
+        energy: {
             points: E(0),
             stats: E(0),
             upgs: [],
@@ -60,6 +69,11 @@ function loadPlayer(load) {
         points: ex(load.prestige.points),
         stats: ex(load.prestige.stats),
         upgs: load.prestige.upgs,
+    }
+    if (load.energy != undefined) player.energy = {
+        points: ex(load.energy.points),
+        stats: ex(load.energy.stats),
+        upgs: load.energy.upgs,
     }
 }
 
