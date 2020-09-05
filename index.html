@@ -1,0 +1,45 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="js/ExpantaNum.js"></script>
+    <script src="js/saves.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/v.js"></script>
+    <title>Incremental Merge</title>
+</head>
+<body onload="loadGame()">
+    <div id="app">
+        Your number is <h2>{{ notate(player.number,0) }}</h2><br>
+        Number is getting <h2>{{ notate(FORMULA.dt_merges(),0) }}</h2>/s<br><br>
+        <div class="table_center">
+            <div v-for='s in TABS'>
+                <button class="tabbox" v-on:click='changeTab(s)'>{{ s }}</button>
+            </div>
+        </div><br><div>
+            <div id='Merges'>
+                <div style="border: solid 3px white; border-radius: 25px; padding: 10px;">
+                    <button onclick="mergeAll()">MERGE</button>
+                    ({{ FORMULA.merges_have() }} / 20) Merger will added on {{ notate(FORMULA.times(), 1) }}s<br><br>
+                    <div v-bind:class="{mergebox: true}" v-for='merge in player.merges' v-if='merge > 0'>
+                        <br><br><h2 style="font-size: 35px;">[{{ merge }}]</h2>
+                        <br><br>+{{ notate(FORMULA.merge_effect(merge),0) }}
+                    </div>
+                </div><br><div class="table_center">
+                    <div v-for='upg in UPGRADE'>
+                        <button class="upg" v-on:click='upg.buy()'>{{ upg.desc }} [{{ upg.level() }}]<br>Cost: {{ notate(upg.cost(),0) }}<br><span v-if='upg.cur'>Effect: {{ upg.curDesc(upg.cur()) }}</span></button>
+                    </div>
+                </div>
+            </div><div id="Prestige" style="display: none;">
+                Coming soon...
+            </div><div id="Achievements" style="display: none;">
+                <div class="table_center">
+                    <div v-for='t in ACHIEVEMENTS.effs'><button class="achi">[{{ t.best() }}] - {{ t.desc }}<br>Currently: {{ t.curDesc(t.cur()) }}</button></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
