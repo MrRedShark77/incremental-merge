@@ -10,9 +10,10 @@ function ex(x){
 }
 
 function calc(dt) {
-    if (ticks < UPGRADE[1].cur() & FORMULA.merges_have() < 20) ticks += dt
-    if (ticks >= UPGRADE[1].cur()) {
+    if (ticks < UPGRADE.merges[1].cur() & (FORMULA.merges_have() < 20 || player.prestige.upgs.includes(12))) ticks += dt
+    if (ticks >= UPGRADE.merges[1].cur()) {
         addMerge()
+        if (player.prestige.upgs.includes(12)) mergeAll()
         ticks = 0
     }
     player.number = player.number.add(FORMULA.dt_merges().mul(dt / 1000))
@@ -21,34 +22,44 @@ function calc(dt) {
 function wipe() {
     player = {
         number: E(0),
+        prestige: {
+            points: E(0),
+            stats: E(0),
+            upgs: [],
+        },
         merges: [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         minMergeLevel: 1,
         bestMergeLevel: 1,
         ticks: 0,
-        upgs: [],
         achievements: [],
     }
 }
 
 function save(){
     if (localStorage.getItem("incMergeSave") == '') wipe()
-    localStorage.setItem("incMergeSave",btoa(JSON.stringify(player)));
+    localStorage.setItem("incMergeSave",btoa(JSON.stringify(player)))
 }
     
 function load(x){
     if(typeof x == "string"){
-        let load = JSON.parse(atob(x));
-        player = {
-            number: ex(load.number),
-            merges: load.merges,
-            minMergeLevel: load.minMergeLevel,
-            bestMergeLevel: load.bestMergeLevel,
-            ticks: load.ticks,
-            upgs: load.upgs,
-            achievements: load.achievements,
-        }
+        loadPlayer(JSON.parse(atob(x)))
     } else {
-        wipe();
+        wipe()
+    }
+}
+
+function loadPlayer(load) {
+    player.number = ex(load.number)
+    player.merges = load.merges
+    player.minMergeLevel = load.minMergeLevel
+    player.bestMergeLevel = load.bestMergeLevel
+    player.ticks = load.ticks
+    player.achievements = load.achievements
+
+    if (load.prestige != undefined) player.prestige = {
+        points: ex(load.prestige.points),
+        stats: ex(load.prestige.stats),
+        upgs: load.prestige.upgs,
     }
 }
 

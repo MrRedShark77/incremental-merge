@@ -28,16 +28,25 @@
                         <br><br>+{{ notate(FORMULA.merge_effect(merge),0) }}
                     </div>
                 </div><br><div class="table_center">
-                    <div v-for='upg in UPGRADE'>
-                        <button class="upg" v-on:click='upg.buy()'>{{ upg.desc }} [{{ upg.level() }}]<br>Cost: {{ notate(upg.cost(),0) }}<br><span v-if='upg.cur'>Effect: {{ upg.curDesc(upg.cur()) }}</span></button>
+                    <div v-for='upg in UPGRADE.merges'>
+                        <button class="upg" v-on:click='upg.buy()' v-bind:class='{closed: player.number.lt(upg.cost())}'>{{ upg.desc }} [{{ upg.level() }}]<br>Cost: {{ notate(upg.cost(),0) }}<br><span v-if='upg.cur'>Effect: {{ upg.curDesc(upg.cur()) }}</span></button>
                     </div>
                 </div>
             </div><div id="Prestige" style="display: none;">
-                Coming soon...
+                You have <h2>{{ notate(player.prestige.points,0) }} [{{ notate(player.prestige.stats,0) }}]</h2> Prestige points, which multiples merges production by {{ notate(FORMULA.prestige_effect()) }}
+                <br><br><button onclick="resetPrestige()" v-bind:class='{closed: FORMULA.prestige_gain().lt(100)}'>Reset your merges and numbers, you gain {{ notate(FORMULA.prestige_gain(),0) }} Prestige points</button>
+                <br><br><div v-for='c in UPGRADE.prestige.col' class="table_center">
+                    <div v-for='r in UPGRADE.prestige.row'>
+                        <button class="upg prestige" v-on:click='buyUPG("prestige",c*10+r)' v-if='UPGRADE.prestige[c*10+r].unl()' v-bind:class='{closed: player.prestige.points.lt(UPGRADE.prestige[c*10+r].cost()) & !player.prestige.upgs.includes(c*10+r), bought: player.prestige.upgs.includes(c*10+r)}'>{{ UPGRADE.prestige[c*10+r].desc }}<br>Cost: {{ notate(UPGRADE.prestige[c*10+r].cost(),0) }}<br><span v-if='UPGRADE.prestige[c*10+r].cur'>Currently: {{ UPGRADE.prestige[c*10+r].curDesc(UPGRADE.prestige[c*10+r].cur()) }}</span></button>
+                    </div>
+                </div>
             </div><div id="Achievements" style="display: none;">
                 <div class="table_center">
                     <div v-for='t in ACHIEVEMENTS.effs'><button class="achi">[{{ t.best() }}] - {{ t.desc }}<br>Currently: {{ t.curDesc(t.cur()) }}</button></div>
                 </div>
+            </div><div id="Options" style="display: none;">
+                <button onclick="save()">Save</button>
+                <button onclick="if (confirm('You wanted to RESET your progress to new game?')) {wipe(); location.reload()}">WIPE</button>
             </div>
         </div>
     </div>

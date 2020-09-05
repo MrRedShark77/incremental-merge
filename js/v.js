@@ -7,6 +7,7 @@ function loadVue() {
             player,
             notate,
             changeTab,
+            buyUPG,
             FORMULA,
             UPGRADE,
             TABS,
