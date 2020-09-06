@@ -42,6 +42,30 @@ button {
     background-color: skyblue;
 }
 
+.sacrifice {
+    color: white;
+    background: repeating-radial-gradient(
+		circle farthest-corner at center center,
+		magenta 0%,
+		purple 15%,
+		magenta 30%
+	);
+    animation: BackgroundGradientSacrifice 6s ease infinite;
+}
+
+@keyframes BackgroundGradientSacrifice {
+    0% {
+		background-size: 100% 100%;
+	}
+	50% {
+        background-size: 200% 100%;
+        background-position-x: 50%;
+	}
+	100% {
+		background-size: 100% 100%;
+	}
+}
+
 .upg {
     width: 200px;
     height: 125px;
@@ -50,6 +74,43 @@ button {
 .upg.prestige {
     width: 125px;
     font-size: 10px;
+}
+
+.particles {
+    color: black;
+    width: 300px;
+    height: 300px;
+    border-radius: 15%;
+    margin: 3px;
+    padding: 3px;
+    animation: BackgroundGradientSacrifice 6s ease infinite;
+}
+
+.particles.p {
+    background: repeating-radial-gradient(
+		circle farthest-corner at center center,
+		#00BFFF 0%,
+		#1E90FF 15%,
+		#00BFFF 30%
+	);
+}
+
+.particles.n {
+    background: repeating-radial-gradient(
+		circle farthest-corner at center center,
+		#F08080 0%,
+		#CD5C5C 15%,
+		#F08080 30%
+	);
+}
+
+.particles.e {
+    background: repeating-radial-gradient(
+		circle farthest-corner at center center,
+		#90EE90 0%,
+		#32CD32 15%,
+		#90EE90 30%
+	);
 }
 
 h1, h2 {

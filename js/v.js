@@ -5,6 +5,8 @@ function loadVue() {
 	    el: "#app",
 	    data: {
             player,
+            particles,
+            large_particles,
             notate,
             changeTab,
             buyUPG,

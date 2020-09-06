@@ -4,9 +4,15 @@ var date = Date.now();
 var player;
 var ticks = 0;
 var tab = 'Merges'
+var particles = ['p','n','e']
+var large_particles = ['Proton','Neutron','Electron']
 
 const FORMULA = {
-    merge_effect: (x) => { return (x > 0)?E(3+3*ACHIEVEMENTS.effs[0].cur()).pow(x-1).mul(FORMULA.prestige_effect()).mul(FORMULA.energy_effect()):0 },
+    merge_effect: (x) => { return (x+FORMULA.particles_eff.e_effect().toNumber() > 0)?E(3+3*ACHIEVEMENTS.effs[0].cur()).pow(x-1+FORMULA.particles_eff.e_effect().toNumber())
+        .mul(FORMULA.prestige_effect())
+        .mul(FORMULA.energy_effect())
+        .pow(player.prestige.upgs.includes(21)?1.1:1)
+        :0 },
     dt_merges: () => {
         let sum = E(0)
         for (let i = 0; i < player.merges.length; i++) sum = sum.add(FORMULA.merge_effect(player.merges[i]))
@@ -19,14 +25,25 @@ const FORMULA = {
         return merge
     },
     prestige_effect: () => { return player.prestige.stats.div(100).add(1) },
-    prestige_gain: () => { return player.number.add(1).logBase(100).pow(3).mul(player.prestige.upgs.includes(11)?UPGRADE.prestige[11].cur():1) },
+    prestige_gain: () => { return player.number.add(1).logBase(100).pow(3).mul(player.prestige.upgs.includes(11)?UPGRADE.prestige[11].cur():1).mul(FORMULA.particles_eff.n_effect()) },
     energy_effect: () => { return player.energy.stats.add(1).pow(0.5) },
+    sacr_gain: () => { return player.prestige.stats.add(1).log10().mul(player.energy.stats.add(1).log10().pow(1.5)) },
+    sacr_effect: () => { return player.sacrifice.stats.pow(0.75).mul(player.sacrifice.upgs.includes(11)?UPGRADE.sacrifice[11].cur():1) },
+    particles_eff: {
+        p_gain: () => { return player.sacrifice.particles.p.add(1).logBase(5).add(1) },
+        n_gain: () => { return player.sacrifice.particles.n.add(1).logBase(10).add(1) },
+        e_gain: () => { return player.sacrifice.particles.e.add(1).logBase(7.5).add(1) },
+        p_effect: () => { return player.sacrifice.particles.p.add(1).logBase(15).add(1) },
+        n_effect: () => { return player.sacrifice.particles.n.add(1).logBase(5).add(1).pow(1/2) },
+        e_effect: () => { return player.sacrifice.particles.e.add(1).logBase(10).pow(1/3) },
+    },
 }
 
 const TABS = [
     'Merges',
     'Prestige',
     'Energy',
+    'Sacrifice',
     'Achievements',
     'Options',
 ]
@@ -37,6 +54,7 @@ const TABS_UNL = {
     'Energy': () => { return player.energy.stats.gte(1) },
     'Achievements': () => { return true },
     'Options': () => { return true },
+    'Sacrifice': () => { return player.unlocks.includes('sacrifice') },
 }
 
 const UPGRADE = {
@@ -72,7 +90,7 @@ const UPGRADE = {
     },
     prestige: {
         row: 3,
-        col: 1,
+        col: 2,
         11: {
             desc: 'Highest Merge Tier boost Prestige gain.',
             unl: () => { return true },
@@ -92,10 +110,25 @@ const UPGRADE = {
             cur: () => { return E(player.energy.stats).add(1).pow(1/5) },
             curDesc: (x) => { return notate(x)+'x' },
         },
+        21: {
+            desc: 'Raise merges production by 1.1.',
+            unl: () => { return player.prestige.upgs.includes(13) },
+            cost: () => { return E(20000) },
+        },
+        22: {
+            desc: 'Gain 1% Prestige points/s.',
+            unl: () => { return player.prestige.upgs.includes(21) },
+            cost: () => { return E(50000) },
+        },
+        23: {
+            desc: 'Unlock Sacrifice.',
+            unl: () => { return player.prestige.upgs.includes(22) },
+            cost: () => { return E(1e6) },
+        },
     },
     energy: {
         row: 3,
-        col: 1,
+        col: 2,
         11: {
             desc: 'Highest Merge Tier boost chance to gain Energy.',
             unl: () => { return true },
@@ -111,9 +144,47 @@ const UPGRADE = {
         13: {
             desc: 'Prestige stats boost Energy points gain.',
             unl: () => { return player.energy.upgs.includes(12) & player.prestige.stats.gte(1) },
-            cost: () => { return E(100) },
+            cost: () => { return E(50) },
             cur: () => { return player.prestige.stats.add(1).log10().add(1).pow(0.75) },
             curDesc: (x) => { return notate(x)+'x' },
+        },
+        21: {
+            desc: 'Placeholder.',
+            unl: () => { return false },
+            cost: () => { return E(1/0) },
+        },
+        22: {
+            desc: 'Placeholder.',
+            unl: () => { return player.energy.upgs.includes(21) },
+            cost: () => { return E(1/0) },
+        },
+        23: {
+            desc: 'Placeholder.',
+            unl: () => { return player.energy.upgs.includes(22) },
+            cost: () => { return E(1/0) },
+        },
+    },
+    sacrifice: {
+        row: 3,
+        col: 1,
+        11: {
+            desc: 'Numbers boost Particles gain.',
+            unl: () => { return true },
+            cost: () => { return E(25) },
+            cur: () => { return player.number.add(1).log10().add(1).sqrt() },
+            curDesc: (x) => { return notate(x)+'x' },
+        },
+        12: {
+            desc: 'Proton boost chance to Energy gain.',
+            unl: () => { return player.sacrifice.upgs.includes(11) },
+            cost: () => { return E(50) },
+            cur: () => { return player.sacrifice.particles.p.add(1).log10().add(1).pow(0.75) },
+            curDesc: (x) => { return notate(x)+'x' },
+        },
+        13: {
+            desc: 'Placeholder.',
+            unl: () => { return false },
+            cost: () => { return E(1/0) },
         },
     },
 }
@@ -137,6 +208,7 @@ function buyUPG(upg, id) {
     if (player[upg].points.gte(cost) & !player[upg].upgs.includes(id)) {
         player[upg].points = player[upg].points.sub(cost)
         player[upg].upgs.push(id)
+        if (upg == 'prestige' & id == 23 & !player.unlocks.includes('sacrifice')) player.unlocks.push('sacrifice')
     }
 }
 
@@ -144,6 +216,27 @@ function resetPrestige() {
     if (FORMULA.prestige_gain().gte(100)) {
         player.prestige.points = player.prestige.points.add(FORMULA.prestige_gain())
         player.prestige.stats = player.prestige.stats.add(FORMULA.prestige_gain())
+        player.number = E(0)
+        player.merges = [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        player.minMergeLevel = 1
+        player.ticks = 0
+    }
+}
+
+function resetSacrifice() {
+    if (FORMULA.sacr_gain().gte(20)) {
+        player.sacrifice.points = player.sacrifice.points.add(FORMULA.sacr_gain())
+        player.sacrifice.stats = player.sacrifice.stats.add(FORMULA.sacr_gain())
+        player.prestige = {
+            points: E(0),
+            stats: E(0),
+            upgs: [],
+        }
+        player.energy = {
+            points: E(0),
+            stats: E(0),
+            upgs: [],
+        }
         player.number = E(0)
         player.merges = [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
         player.minMergeLevel = 1
@@ -169,9 +262,9 @@ function mergeAll() {
         for (let i = 0; i < player.merges.length - 1; i++){
             for (let j = i+1; j < player.merges.length; j++){
                 if(player.merges[i] == player.merges[j] && player.merges[i] != 0 && player.merges[j] != 0){
-                    let chance = Math.random() * 101
-                    if (chance <= (player.energy.upgs.includes(11)?UPGRADE.energy[11].cur():1)) {
-                        let gain = player.energy.upgs.includes(13)?UPGRADE.energy[13].cur():1
+                    let chance = E(Math.random() * 101).lte(E(1).mul(player.energy.upgs.includes(11)?UPGRADE.energy[11].cur():1).mul(player.sacrifice.upgs.includes(12)?UPGRADE.sacrifice[12].cur():1))
+                    if (chance) {
+                        let gain = (player.energy.upgs.includes(13)?UPGRADE.energy[13].cur():E(1)).mul(FORMULA.particles_eff.p_effect())
                         player.energy.points = player.energy.points.add(gain)
                         player.energy.stats = player.energy.stats.add(gain)
                     }
@@ -187,6 +280,7 @@ function mergeAll() {
 
 function notate(ex, acc=2) {
     ex = E(ex)
+    if (ex.isInfinite()) return 'Infinity'
     let e = ex.log10().floor()
     if (e.lt(6)) {
         if (e.lt(3)) {

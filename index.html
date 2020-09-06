@@ -16,7 +16,7 @@
         Number is getting <h2>{{ notate(FORMULA.dt_merges(),0) }}</h2>/s<br><br>
         <div class="table_center">
             <div v-for='s in TABS'>
-                <button class="tabbox" v-on:click='changeTab(s)' v-bind:class="{energy: s == 'Energy'}" v-if="TABS_UNL[s]()">{{ s }}</button>
+                <button class="tabbox" v-on:click='changeTab(s)' v-bind:class="{energy: s == 'Energy', sacrifice: s == 'Sacrifice'}" v-if="TABS_UNL[s]()">{{ s }}</button>
             </div>
         </div><br><div>
             <div id='Merges'>
@@ -45,6 +45,22 @@
                 <br><br><div v-for='c in UPGRADE.energy.col' class="table_center">
                     <div v-for='r in UPGRADE.energy.row'>
                         <button class="upg prestige" v-on:click='buyUPG("energy",c*10+r)' v-if='UPGRADE.energy[c*10+r].unl()' v-bind:class='{closed: player.energy.points.lt(UPGRADE.energy[c*10+r].cost()) & !player.energy.upgs.includes(c*10+r), bought: player.energy.upgs.includes(c*10+r)}'>{{ UPGRADE.energy[c*10+r].desc }}<br>Cost: {{ notate(UPGRADE.energy[c*10+r].cost(),0) }}<br><span v-if='UPGRADE.energy[c*10+r].cur'>Currently: {{ UPGRADE.energy[c*10+r].curDesc(UPGRADE.energy[c*10+r].cur()) }}</span></button>
+                    </div>
+                </div>
+            </div><div id="Sacrifice" style="display: none;">
+                Reset your Numbers & Merges, if you Sacrificed only over 20 Sacrifice points to reset.<br>
+                <button onclick="resetSacrifice()" class="sacrifice">Sacrifice your Prestige & Energy<br>for {{ notate(FORMULA.sacr_gain()) }} Sacrifice points</button>
+                <br>You have <h2>{{ notate(player.sacrifice.points) }} [{{ notate(player.sacrifice.stats) }}]</h2> Sacrifice points, which generates {{ notate(FORMULA.sacr_effect()) }} Particles/s.
+                <br><br><div class="table_center">
+                    <div v-for='p in particles.length' class="particles" v-bind:class='{[particles[p-1]]: true}'>
+                        You have<br><h2>{{ notate(player.sacrifice.particles[particles[p-1]]) }}</h2>
+                        <br>{{ large_particles[p-1] }} particles
+                        <br><br>Which boosts {{ large_particles[p-3*Math.floor(p/3)] }} gain by<br><h2>{{ notate(FORMULA.particles_eff[particles[p-1]+'_gain']()) }}</h2>x
+                        <br><br>And boosts {{ ["Energy gain","Prestige gain","Merge level"][p-1] }} by<br><h2>{{ notate(FORMULA.particles_eff[particles[p-1]+'_effect']()) }}</h2>{{ ["x","x","+"][p-1] }}
+                    </div>
+                </div><br><div v-for='c in UPGRADE.sacrifice.col' class="table_center">
+                    <div v-for='r in UPGRADE.sacrifice.row'>
+                        <button class="upg prestige" v-on:click='buyUPG("sacrifice",c*10+r)' v-if='UPGRADE.sacrifice[c*10+r].unl()' v-bind:class='{closed: player.sacrifice.points.lt(UPGRADE.sacrifice[c*10+r].cost()) & !player.sacrifice.upgs.includes(c*10+r), bought: player.sacrifice.upgs.includes(c*10+r)}'>{{ UPGRADE.sacrifice[c*10+r].desc }}<br>Cost: {{ notate(UPGRADE.sacrifice[c*10+r].cost(),0) }}<br><span v-if='UPGRADE.sacrifice[c*10+r].cur'>Currently: {{ UPGRADE.sacrifice[c*10+r].curDesc(UPGRADE.sacrifice[c*10+r].cur()) }}</span></button>
                     </div>
                 </div>
             </div><div id="Achievements" style="display: none;">
