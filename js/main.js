@@ -6,6 +6,8 @@ var ticks = 0;
 var tab = 'Merges'
 var particles = ['p','n','e']
 var large_particles = ['Proton','Neutron','Electron']
+var chal = []
+var chalText = (c, r) => { return (player.chal[0] == c*10+r)?(player.number.gte(CHALLENGES[c*10+r].goal)?"Finish":'Exit'):(player.chalCompleted.includes(c*10+r)?'Finished':'Start') }
 
 const FORMULA = {
     merge_effect: (x) => { return (x > 0)?E(3+3*ACHIEVEMENTS.effs[0].cur()).pow(x-1+FORMULA.particles_eff.e_effect().toNumber())
@@ -28,6 +30,13 @@ const FORMULA = {
     prestige_gain: () => { return player.number.add(1).logBase(100).pow(3)
         .mul(player.prestige.upgs.includes(11)?UPGRADE.prestige[11].cur():1)
         .mul(FORMULA.particles_eff.n_effect())
+        .mul(player.chalCompleted.includes(11)?CHALLENGES[11].cur():1)
+        .mul(player.chal.includes(11)?0:1)
+    },
+    energy_gain: () => { return (player.energy.upgs.includes(13)?UPGRADE.energy[13].cur():E(1))
+        .mul(FORMULA.particles_eff.p_effect()
+        .mul(player.energy.upgs.includes(23)?UPGRADE.energy[23].cur():1))
+        .mul(player.chal.includes(12)?0:1)
     },
     energy_effect: () => { return player.energy.stats.add(1).pow(player.prestige.upgs.includes(31)?0.95:0.75) },
     sacr_gain: () => { return player.prestige.stats.add(1).log10().mul(player.energy.stats.add(1).log10().pow(1.5)) },
@@ -48,6 +57,7 @@ const TABS = [
     'Prestige',
     'Energy',
     'Sacrifice',
+    'Challenges',
     'Achievements',
     'Options',
 ]
@@ -59,6 +69,7 @@ const TABS_UNL = {
     'Achievements': () => { return true },
     'Options': () => { return true },
     'Sacrifice': () => { return player.unlocks.includes('sacrifice') },
+    'Challenges': () => { return player.unlocks.includes('challenges') },
 }
 
 const UPGRADE = {
@@ -116,7 +127,7 @@ const UPGRADE = {
         },
         21: {
             desc: 'Raise merges production by 1.15.',
-            unl: () => { return player.prestige.upgs.includes(13) },
+            unl: () => { return player.prestige.upgs.includes(12) },
             cost: () => { return E(20000) },
         },
         22: {
@@ -169,17 +180,17 @@ const UPGRADE = {
         },
         21: {
             desc: 'Raise Prestige effect by 1.15.',
-            unl: () => { return player.sacrifice.upgs.includes(13) & player.energy.upgs.includes(13) },
+            unl: () => { return player.sacrifice.upgs.includes(12) & player.energy.upgs.includes(13) },
             cost: () => { return E(5000) },
         },
         22: {
             desc: 'Prestige upgrade 1 formula is better.',
-            unl: () => { return player.sacrifice.upgs.includes(13) & player.energy.upgs.includes(13) },
+            unl: () => { return player.sacrifice.upgs.includes(12) & player.energy.upgs.includes(13) },
             cost: () => { return E(20000) },
         },
         23: {
             desc: 'Energy Stats boost Energy gain.',
-            unl: () => { return player.sacrifice.upgs.includes(13) & player.energy.upgs.includes(13) },
+            unl: () => { return player.sacrifice.upgs.includes(12) & player.energy.upgs.includes(13) },
             cost: () => { return E(50000) },
             cur: () => { return player.energy.stats.add(1).log10().add(1).pow(0.5) },
             curDesc: (x) => { return notate(x)+'x' },
@@ -210,6 +221,29 @@ const UPGRADE = {
     },
 }
 
+const CHALLENGES = {
+    col: 1,
+    row: 2,
+    11: {
+        title: 'Non-Prestige',
+        desc: 'You cannot gain Prestige.',
+        reward: 'Numbers boost Prestige gain.',
+        goal: E(1e36),
+        unl: () => { return true },
+        cur: () => { return player.number.add(1).log10().add(1).pow(0.4) },
+        curDesc: (x) => { return notate(x)+'x' },
+    },
+    12: {
+        title: 'Non-Energy',
+        desc: 'You cannot gain Energy.',
+        reward: 'Numbers boost Energy gain.',
+        goal: E(1e64),
+        unl: () => { return true },
+        cur: () => { return player.number.add(1).log10().add(1).pow(0.6) },
+        curDesc: (x) => { return notate(x)+'x' },
+    },
+}
+
 const ACHIEVEMENTS = {
     unls: {
 
@@ -222,6 +256,36 @@ const ACHIEVEMENTS = {
             curDesc: (x) => { return notate(x*100,1) + '%' }, 
         },
     },
+}
+
+function startChal(id) {
+    if (player.chal.length == 0) {
+        resetChal()
+        player.chal.push(id)
+    } else if (player.chal[0] == id) {
+        if (player.number.gte(CHALLENGES[id].goal) & !player.chalCompleted.includes(id)) {
+            player.chalCompleted.push(id)
+        }
+        resetChal()
+        player.chal = []
+    }
+}
+
+function resetChal() {
+    player.number = E(0)
+    player.prestige = {
+        points: E(0),
+        stats: E(0),
+        upgs: [],
+    }
+    player.energy = {
+        points: E(0),
+        stats: E(0),
+        upgs: [],
+    }
+    player.merges = [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+    player.minMergeLevel = 1
+    player.ticks = 0
 }
 
 function buyUPG(upg, id) {
@@ -285,7 +349,7 @@ function mergeAll() {
                 if(player.merges[i] == player.merges[j] && player.merges[i] != 0 && player.merges[j] != 0){
                     let chance = E(Math.random() * 101).lte(E(1).mul(player.energy.upgs.includes(11)?UPGRADE.energy[11].cur():1).mul(player.sacrifice.upgs.includes(12)?UPGRADE.sacrifice[12].cur():1))
                     if (chance) {
-                        let gain = (player.energy.upgs.includes(13)?UPGRADE.energy[13].cur():E(1)).mul(FORMULA.particles_eff.p_effect().mul(player.energy.upgs.includes(23)?UPGRADE.energy[23].cur():1))
+                        let gain = FORMULA.energy_gain()
                         player.energy.points = player.energy.points.add(gain)
                         player.energy.stats = player.energy.stats.add(gain)
                     }

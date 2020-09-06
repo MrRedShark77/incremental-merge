@@ -130,6 +130,21 @@ h1, h2 {
     height: 150px;
 }
 
+.challenge {
+    color: black;
+    background-color: white;
+    width: 250px;
+    height: 250px;
+    border-radius: 15%;
+    margin: 3px;
+    padding: 3px;
+}
+
+.chal_button {
+    width: 100px;
+    height: 30px;
+}
+
 .closed {
     background-color: red;
 }

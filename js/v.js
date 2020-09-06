@@ -7,13 +7,17 @@ function loadVue() {
             player,
             particles,
             large_particles,
+            tab,
             notate,
             changeTab,
             buyUPG,
+            startChal,
+            chalText,
             TABS_UNL,
             FORMULA,
             UPGRADE,
             TABS,
+            CHALLENGES,
             ACHIEVEMENTS,
         }
 	})

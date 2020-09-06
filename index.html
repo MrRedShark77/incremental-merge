@@ -64,6 +64,17 @@
                         <button class="upg prestige" v-on:click='buyUPG("sacrifice",c*10+r)' v-if='UPGRADE.sacrifice[c*10+r].unl()' v-bind:class='{closed: player.sacrifice.points.lt(UPGRADE.sacrifice[c*10+r].cost()) & !player.sacrifice.upgs.includes(c*10+r), bought: player.sacrifice.upgs.includes(c*10+r)}'>{{ UPGRADE.sacrifice[c*10+r].desc }}<br>Cost: {{ notate(UPGRADE.sacrifice[c*10+r].cost(),0) }}<br><span v-if='UPGRADE.sacrifice[c*10+r].cur'>Currently: {{ UPGRADE.sacrifice[c*10+r].curDesc(UPGRADE.sacrifice[c*10+r].cur()) }}</span></button>
                     </div>
                 </div>
+            </div><div id='Challenges' style="display: none;">
+                <div v-for='c in CHALLENGES.col' class="table_center">
+                    <div v-for='r in CHALLENGES.row' class="challenge" v-if='CHALLENGES[c*10+r].unl()' v-bind:class='{bought: player.chalCompleted.includes(c*10+r)}'>
+                        <h2>{{ CHALLENGES[c*10+r].title }}</h2>
+                        <br><br>{{ CHALLENGES[c*10+r].desc }}
+                        <br><br><button class="chal_button" v-on:click='startChal(c*10+r)'>{{ chalText(c, r) }}</button>
+                        <br><br>Goal: {{ notate(CHALLENGES[c*10+r].goal) }} Numbers
+                        <br>Reward: {{ CHALLENGES[c*10+r].reward }}
+                        <br><span v-if='CHALLENGES[c*10+r].cur'>Currently: {{ CHALLENGES[c*10+r].curDesc(CHALLENGES[c*10+r].cur()) }}</span>
+                    </div>
+                </div>
             </div><div id="Achievements" style="display: none;">
                 <div class="table_center">
                     <div v-for='t in ACHIEVEMENTS.effs'><button class="achi">[{{ t.best() }}] - {{ t.desc }}<br>Currently: {{ t.curDesc(t.cur()) }}</button></div>

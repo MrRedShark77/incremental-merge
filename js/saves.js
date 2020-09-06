@@ -27,6 +27,9 @@ function calc(dt) {
     for (let i = 0; i < 3; i++) {
         player.sacrifice.particles[particles[i]] = player.sacrifice.particles[particles[i]].add(FORMULA.particles_gain(i).mul(dt / 1000))
     }
+    if (player.number.gte('e100') & !player.unlocks.includes('challenges')) {
+        player.unlocks.push('challenges')
+    }
 }
 
 function wipe() {
@@ -52,6 +55,8 @@ function wipe() {
                 e: E(0),
             }
         },
+        chal: [],
+        chalCompleted: [],
         unlocks: [],
         merges: [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         minMergeLevel: 1,
@@ -82,6 +87,8 @@ function loadPlayer(load) {
     player.ticks = load.ticks
     player.achievements = load.achievements
     if (load.unlocks != undefined) player.unlocks = load.unlocks
+    if (load.chal != undefined) player.chal = load.chal
+    if (load.chalCompleted != undefined) player.chalCompleted = load.chalCompleted
     if (load.prestige != undefined) player.prestige = {
         points: ex(load.prestige.points),
         stats: ex(load.prestige.stats),
