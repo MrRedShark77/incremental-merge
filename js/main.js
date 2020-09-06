@@ -8,7 +8,7 @@ var particles = ['p','n','e']
 var large_particles = ['Proton','Neutron','Electron']
 
 const FORMULA = {
-    merge_effect: (x) => { return (x+FORMULA.particles_eff.e_effect().toNumber() > 0)?E(3+3*ACHIEVEMENTS.effs[0].cur()).pow(x-1+FORMULA.particles_eff.e_effect().toNumber())
+    merge_effect: (x) => { return (x > 0)?E(3+3*ACHIEVEMENTS.effs[0].cur()).pow(x-1+FORMULA.particles_eff.e_effect().toNumber())
         .mul(FORMULA.prestige_effect())
         .mul(FORMULA.energy_effect())
         .pow(player.prestige.upgs.includes(21)?1.1:1)
@@ -24,19 +24,23 @@ const FORMULA = {
         for (let i = 0; i < player.merges.length; i++) if (player.merges[i]!=0) merge++
         return merge
     },
-    prestige_effect: () => { return player.prestige.stats.div(100).add(1) },
-    prestige_gain: () => { return player.number.add(1).logBase(100).pow(3).mul(player.prestige.upgs.includes(11)?UPGRADE.prestige[11].cur():1).mul(FORMULA.particles_eff.n_effect()) },
-    energy_effect: () => { return player.energy.stats.add(1).pow(0.5) },
+    prestige_effect: () => { return player.prestige.stats.div(100).add(1).pow(player.energy.upgs.includes(21)?1.15:1) },
+    prestige_gain: () => { return player.number.add(1).logBase(100).pow(3)
+        .mul(player.prestige.upgs.includes(11)?UPGRADE.prestige[11].cur():1)
+        .mul(FORMULA.particles_eff.n_effect())
+    },
+    energy_effect: () => { return player.energy.stats.add(1).pow(player.prestige.upgs.includes(31)?0.95:0.75) },
     sacr_gain: () => { return player.prestige.stats.add(1).log10().mul(player.energy.stats.add(1).log10().pow(1.5)) },
-    sacr_effect: () => { return player.sacrifice.stats.pow(0.75).mul(player.sacrifice.upgs.includes(11)?UPGRADE.sacrifice[11].cur():1) },
+    sacr_effect: () => { return player.sacrifice.stats.pow(1.15).mul(player.sacrifice.upgs.includes(11)?UPGRADE.sacrifice[11].cur():1) },
     particles_eff: {
         p_gain: () => { return player.sacrifice.particles.p.add(1).logBase(5).add(1) },
         n_gain: () => { return player.sacrifice.particles.n.add(1).logBase(10).add(1) },
         e_gain: () => { return player.sacrifice.particles.e.add(1).logBase(7.5).add(1) },
         p_effect: () => { return player.sacrifice.particles.p.add(1).logBase(15).add(1) },
-        n_effect: () => { return player.sacrifice.particles.n.add(1).logBase(5).add(1).pow(1/2) },
+        n_effect: () => { return player.sacrifice.particles.n.add(1).logBase(2).add(1).pow(1/2) },
         e_effect: () => { return player.sacrifice.particles.e.add(1).logBase(10).pow(1/3) },
     },
+    particles_gain: (i) => { return FORMULA.sacr_effect().mul(FORMULA.particles_eff[['e','p','n'][i]+'_gain']()) },
 }
 
 const TABS = [
@@ -62,7 +66,7 @@ const UPGRADE = {
         0: {
             desc: 'Mergers spawn 1 Tier higher.',
             level: () => { return player.minMergeLevel },
-            cost: () => { return E(3+(player.minMergeLevel-1)/25).pow(player.minMergeLevel-1).mul(1000) },
+            cost: () => { return E(3+(player.minMergeLevel-1)/(25*(player.prestige.upgs.includes(32)?1.25:1))).pow(player.minMergeLevel-1).mul(1000) },
             buy: () => {
                 let cost = UPGRADE.merges[0].cost()
                 if (player.number.gte(cost)) {
@@ -90,12 +94,12 @@ const UPGRADE = {
     },
     prestige: {
         row: 3,
-        col: 2,
+        col: 3,
         11: {
             desc: 'Highest Merge Tier boost Prestige gain.',
             unl: () => { return true },
             cost: () => { return E(250) },
-            cur: () => { return E(player.bestMergeLevel).add(1).pow(1/6) },
+            cur: () => { return E(player.bestMergeLevel).add(1).pow(player.energy.upgs.includes(22)?1/2:1/6) },
             curDesc: (x) => { return notate(x)+'x' },
         },
         12: {
@@ -111,7 +115,7 @@ const UPGRADE = {
             curDesc: (x) => { return notate(x)+'x' },
         },
         21: {
-            desc: 'Raise merges production by 1.1.',
+            desc: 'Raise merges production by 1.15.',
             unl: () => { return player.prestige.upgs.includes(13) },
             cost: () => { return E(20000) },
         },
@@ -122,8 +126,23 @@ const UPGRADE = {
         },
         23: {
             desc: 'Unlock Sacrifice.',
-            unl: () => { return player.prestige.upgs.includes(22) },
+            unl: () => { return player.prestige.upgs.includes(22) & !player.unlocks.includes('sacrifice') },
             cost: () => { return E(1e6) },
+        },
+        31: {
+            desc: 'Energy effect formula is better.',
+            unl: () => { return player.sacrifice.upgs.includes(13) & player.prestige.upgs.includes(22) },
+            cost: () => { return E(1e6) },
+        },
+        32: {
+            desc: 'Merge upgrade 1 cost is 25% cheaper.',
+            unl: () => { return player.sacrifice.upgs.includes(13) & player.prestige.upgs.includes(22) },
+            cost: () => { return E(3e6) },
+        },
+        33: {
+            desc: 'Energy upgrade 1 formula is better.',
+            unl: () => { return player.sacrifice.upgs.includes(13) & player.prestige.upgs.includes(22) },
+            cost: () => { return E(6e6) },
         },
     },
     energy: {
@@ -133,7 +152,7 @@ const UPGRADE = {
             desc: 'Highest Merge Tier boost chance to gain Energy.',
             unl: () => { return true },
             cost: () => { return E(5) },
-            cur: () => { return E(player.bestMergeLevel).add(1).pow(1/5).toNumber() },
+            cur: () => { return E(player.bestMergeLevel).add(1).pow(player.prestige.upgs.includes(33)?1/3:1/5).toNumber() },
             curDesc: (x) => { return notate(x)+'x' },
         },
         12: {
@@ -149,19 +168,21 @@ const UPGRADE = {
             curDesc: (x) => { return notate(x)+'x' },
         },
         21: {
-            desc: 'Placeholder.',
-            unl: () => { return false },
-            cost: () => { return E(1/0) },
+            desc: 'Raise Prestige effect by 1.15.',
+            unl: () => { return player.sacrifice.upgs.includes(13) & player.energy.upgs.includes(13) },
+            cost: () => { return E(5000) },
         },
         22: {
-            desc: 'Placeholder.',
-            unl: () => { return player.energy.upgs.includes(21) },
-            cost: () => { return E(1/0) },
+            desc: 'Prestige upgrade 1 formula is better.',
+            unl: () => { return player.sacrifice.upgs.includes(13) & player.energy.upgs.includes(13) },
+            cost: () => { return E(20000) },
         },
         23: {
-            desc: 'Placeholder.',
-            unl: () => { return player.energy.upgs.includes(22) },
-            cost: () => { return E(1/0) },
+            desc: 'Energy Stats boost Energy gain.',
+            unl: () => { return player.sacrifice.upgs.includes(13) & player.energy.upgs.includes(13) },
+            cost: () => { return E(50000) },
+            cur: () => { return player.energy.stats.add(1).log10().add(1).pow(0.5) },
+            curDesc: (x) => { return notate(x)+'x' },
         },
     },
     sacrifice: {
@@ -182,9 +203,9 @@ const UPGRADE = {
             curDesc: (x) => { return notate(x)+'x' },
         },
         13: {
-            desc: 'Placeholder.',
-            unl: () => { return false },
-            cost: () => { return E(1/0) },
+            desc: 'Unlock 3 new Prestige & Energy upgrades.',
+            unl: () => { return player.sacrifice.upgs.includes(12) },
+            cost: () => { return E(100) },
         },
     },
 }
@@ -264,7 +285,7 @@ function mergeAll() {
                 if(player.merges[i] == player.merges[j] && player.merges[i] != 0 && player.merges[j] != 0){
                     let chance = E(Math.random() * 101).lte(E(1).mul(player.energy.upgs.includes(11)?UPGRADE.energy[11].cur():1).mul(player.sacrifice.upgs.includes(12)?UPGRADE.sacrifice[12].cur():1))
                     if (chance) {
-                        let gain = (player.energy.upgs.includes(13)?UPGRADE.energy[13].cur():E(1)).mul(FORMULA.particles_eff.p_effect())
+                        let gain = (player.energy.upgs.includes(13)?UPGRADE.energy[13].cur():E(1)).mul(FORMULA.particles_eff.p_effect().mul(player.energy.upgs.includes(23)?UPGRADE.energy[23].cur():1))
                         player.energy.points = player.energy.points.add(gain)
                         player.energy.stats = player.energy.stats.add(gain)
                     }

@@ -25,7 +25,7 @@ function calc(dt) {
     player.prestige.points = player.prestige.points.add(pr_gain)
     player.prestige.stats = player.prestige.stats.add(pr_gain)
     for (let i = 0; i < 3; i++) {
-        player.sacrifice.particles[particles[i]] = player.sacrifice.particles[particles[i]].add(FORMULA.sacr_effect().mul(FORMULA.particles_eff[['e','p','n'][i]+'_gain']()).mul(dt / 1000))
+        player.sacrifice.particles[particles[i]] = player.sacrifice.particles[particles[i]].add(FORMULA.particles_gain(i).mul(dt / 1000))
     }
 }
 

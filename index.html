@@ -54,6 +54,7 @@
                 <br><br><div class="table_center">
                     <div v-for='p in particles.length' class="particles" v-bind:class='{[particles[p-1]]: true}'>
                         You have<br><h2>{{ notate(player.sacrifice.particles[particles[p-1]]) }}</h2>
+                        <br>(+{{ notate(FORMULA.particles_gain(p-1)) }}/s)
                         <br>{{ large_particles[p-1] }} particles
                         <br><br>Which boosts {{ large_particles[p-3*Math.floor(p/3)] }} gain by<br><h2>{{ notate(FORMULA.particles_eff[particles[p-1]+'_gain']()) }}</h2>x
                         <br><br>And boosts {{ ["Energy gain","Prestige gain","Merge level"][p-1] }} by<br><h2>{{ notate(FORMULA.particles_eff[particles[p-1]+'_effect']()) }}</h2>{{ ["x","x","+"][p-1] }}
