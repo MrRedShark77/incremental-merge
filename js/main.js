@@ -58,8 +58,12 @@ const FORMULA = {
         e_effect: () => { return player.sacrifice.particles.e.add(1).logBase(10).pow(1/3) },
     },
     particles_gain: (i) => { return FORMULA.sacr_effect().mul(FORMULA.particles_eff[['e','p','n'][i]+'_gain']()) },
-    preons_gain: () => { return player.sacrifice.upgs.includes(23)?player.preons.stats.add(1).log10().add(1):E(0) },
-    preons_effect: () => { return player.preons.stats.add(1).log10().add(1) },
+    preons_gain: () => { return player.sacrifice.upgs.includes(23)?player.preons.stats.add(1).log10().add(1)
+        .mul(player.preons.upgs.includes(11)?UPGRADE.preons[11].cur():1)
+        .mul(player.preons.upgs.includes(12)?UPGRADE.preons[12].cur():1)
+        .mul(player.preons.upgs.includes(13)?UPGRADE.preons[13].cur():1)
+    :E(0)},
+    preons_effect: () => { return player.preons.stats.add(1).log10().add(1).mul(player.preons.upgs.includes(14)?UPGRADE.preons[14].cur():1) },
 }
 
 const TABS = [
@@ -248,6 +252,38 @@ const UPGRADE = {
             desc: 'Unlock Preons, generate Preons.',
             unl: () => { return player.sacrifice.upgs.includes(13) },
             cost: () => { return E(5e3) },
+        },
+    },
+    preons: {
+        row: 4,
+        col: 1,
+        11: {
+            desc: 'Multiply Preon production based on Energy Stat.',
+            unl: () => { return true },
+            cost: () => { return E(1000) },
+            cur: () => { return player.energy.stats.add(1).log10().add(1) },
+            curDesc: (x) => { return notate(x)+'x' },
+        },
+        12: {
+            desc: 'Multiply Preon production based on Prestige Stat.',
+            unl: () => { return true },
+            cost: () => { return E(1e4) },
+            cur: () => { return player.prestige.stats.add(1).log10().add(1) },
+            curDesc: (x) => { return notate(x)+'x' },
+        },
+        13: {
+            desc: 'Multiply Preon production based on Preon Stat.',
+            unl: () => { return true },
+            cost: () => { return E(1.5e5) },
+            cur: () => { return player.preons.stats.add(1).logBase(2).add(1) },
+            curDesc: (x) => { return notate(x)+'x' },
+        },
+        14: {
+            desc: 'Multiply the multiplier that Preons give to particle production based on Neutrons.',
+            unl: () => { return true },
+            cost: () => { return E(1e6) },
+            cur: () => { return player.sacrifice.particles.n.add(1).log10().add(1) },
+            curDesc: (x) => { return notate(x)+'x' },
         },
     },
 }
