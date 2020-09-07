@@ -13,7 +13,9 @@ const FORMULA = {
     merge_effect: (x) => { return (x > 0)?E(3+3*ACHIEVEMENTS.effs[0].cur()).pow(x-1+FORMULA.particles_eff.e_effect().toNumber())
         .mul(FORMULA.prestige_effect())
         .mul(FORMULA.energy_effect())
-        .pow(player.prestige.upgs.includes(21)?1.1:1)
+        .mul(player.chalCompleted.includes(21)?CHALLENGES[21].cur():1)
+        .pow(player.prestige.upgs.includes(21)?1.15:1)
+        .div(player.chal.includes(21)?(player.number.add(1).cbrt()):1)
         :0 },
     dt_merges: () => {
         let sum = E(0)
@@ -39,8 +41,14 @@ const FORMULA = {
         .mul(player.chal.includes(12)?0:1)
     },
     energy_effect: () => { return player.energy.stats.add(1).pow(player.prestige.upgs.includes(31)?0.95:0.75) },
-    sacr_gain: () => { return player.prestige.stats.add(1).log10().mul(player.energy.stats.add(1).log10().pow(1.5)) },
-    sacr_effect: () => { return player.sacrifice.stats.pow(1.15).mul(player.sacrifice.upgs.includes(11)?UPGRADE.sacrifice[11].cur():1) },
+    sacr_gain: () => { return player.prestige.stats.add(1).log10().mul(player.energy.stats.add(1).log10().pow(1.5))
+        .mul(player.sacrifice.upgs.includes(21)?UPGRADE.sacrifice[21].cur():1)
+        .mul(player.sacrifice.upgs.includes(22)?UPGRADE.sacrifice[22].cur():1)
+        .mul(FORMULA.preons_effect())
+    },
+    sacr_effect: () => { return player.sacrifice.stats.pow(1.15).mul(player.sacrifice.upgs.includes(11)?UPGRADE.sacrifice[11].cur():1)
+        .mul(FORMULA.preons_effect())
+    },
     particles_eff: {
         p_gain: () => { return player.sacrifice.particles.p.add(1).logBase(5).add(1) },
         n_gain: () => { return player.sacrifice.particles.n.add(1).logBase(10).add(1) },
@@ -50,6 +58,8 @@ const FORMULA = {
         e_effect: () => { return player.sacrifice.particles.e.add(1).logBase(10).pow(1/3) },
     },
     particles_gain: (i) => { return FORMULA.sacr_effect().mul(FORMULA.particles_eff[['e','p','n'][i]+'_gain']()) },
+    preons_gain: () => { return player.sacrifice.upgs.includes(23)?player.preons.stats.add(1).log10().add(1):E(0) },
+    preons_effect: () => { return player.preons.stats.add(1).log10().add(1) },
 }
 
 const TABS = [
@@ -57,6 +67,7 @@ const TABS = [
     'Prestige',
     'Energy',
     'Sacrifice',
+    'Preons',
     'Challenges',
     'Achievements',
     'Options',
@@ -70,6 +81,7 @@ const TABS_UNL = {
     'Options': () => { return true },
     'Sacrifice': () => { return player.unlocks.includes('sacrifice') },
     'Challenges': () => { return player.unlocks.includes('challenges') },
+    'Preons': () => { return player.sacrifice.upgs.includes(23) },
 }
 
 const UPGRADE = {
@@ -198,7 +210,7 @@ const UPGRADE = {
     },
     sacrifice: {
         row: 3,
-        col: 1,
+        col: 2,
         11: {
             desc: 'Numbers boost Particles gain.',
             unl: () => { return true },
@@ -218,11 +230,30 @@ const UPGRADE = {
             unl: () => { return player.sacrifice.upgs.includes(12) },
             cost: () => { return E(100) },
         },
+        21: {
+            desc: 'Energy Stats boost Sacrifice gain.',
+            unl: () => { return player.sacrifice.upgs.includes(13) },
+            cost: () => { return E(250) },
+            cur: () => { return player.energy.stats.add(1).log10().add(1) },
+            curDesc: (x) => { return notate(x)+'x' },
+        },
+        22: {
+            desc: 'Prestige Stats boost Sacrifice gain.',
+            unl: () => { return player.sacrifice.upgs.includes(13) },
+            cost: () => { return E(500) },
+            cur: () => { return player.prestige.stats.add(1).log10().add(1) },
+            curDesc: (x) => { return notate(x)+'x' },
+        },
+        23: {
+            desc: 'Unlock Preons, generate Preons.',
+            unl: () => { return player.sacrifice.upgs.includes(13) },
+            cost: () => { return E(5e3) },
+        },
     },
 }
 
 const CHALLENGES = {
-    col: 1,
+    col: 2,
     row: 2,
     11: {
         title: 'Non-Prestige',
@@ -241,6 +272,22 @@ const CHALLENGES = {
         unl: () => { return true },
         cur: () => { return player.number.add(1).log10().add(1).pow(0.6) },
         curDesc: (x) => { return notate(x)+'x' },
+    },
+    21: {
+        title: 'Number-Divison',
+        desc: 'Divide Merges production based on Numbers.',
+        reward: 'Numbers boost Merges production.',
+        goal: E(1e45),
+        unl: () => { return player.chalCompleted.includes(11) & player.chalCompleted.includes(12) },
+        cur: () => { return player.number.add(1).log10().add(1).pow(2) },
+        curDesc: (x) => { return notate(x)+'x' },
+    },
+    22: {
+        title: 'Placeholder',
+        desc: 'Placeholder.',
+        reward: 'Placeholder.',
+        goal: E(1/0),
+        unl: () => { return false },
     },
 }
 

@@ -50,10 +50,15 @@ button {
 		purple 15%,
 		magenta 30%
 	);
-    animation: BackgroundGradientSacrifice 6s ease infinite;
+    animation: BackgroundGradientSacrifice1 6s ease infinite;
 }
 
-@keyframes BackgroundGradientSacrifice {
+.preons {
+    color: white;
+    background: linear-gradient(90deg, rgba(0,7,143,1) 0%, rgba(43,43,43,1) 50%, rgba(255,0,0,1) 100%);
+}
+
+@keyframes BackgroundGradientSacrifice1 {
     0% {
 		background-size: 100% 100%;
 	}

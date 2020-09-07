@@ -30,6 +30,8 @@ function calc(dt) {
     if (player.number.gte('e100') & !player.unlocks.includes('challenges')) {
         player.unlocks.push('challenges')
     }
+    player.preons.points = player.preons.points.add(FORMULA.preons_gain().mul(dt/1000))
+    player.preons.stats = player.preons.stats.add(FORMULA.preons_gain().mul(dt/1000))
 }
 
 function wipe() {
@@ -54,6 +56,11 @@ function wipe() {
                 n: E(0),
                 e: E(0),
             }
+        },
+        preons: {
+            points: E(0),
+            stats: E(0),
+            upgs: [],
         },
         chal: [],
         chalCompleted: [],
@@ -108,6 +115,11 @@ function loadPlayer(load) {
             n: ex(load.sacrifice.particles.n),
             e: ex(load.sacrifice.particles.e),
         }
+    }
+    if (load.preons != undefined) player.preons = {
+        points: ex(load.preons.points),
+        stats: ex(load.preons.stats),
+        upgs: load.preons.upgs,
     }
 }
 
