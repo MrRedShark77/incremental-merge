@@ -15,6 +15,7 @@ const FORMULA = {
         .mul(FORMULA.energy_effect())
         .mul(player.chalCompleted.includes(21)?CHALLENGES[21].cur():1)
         .pow(player.prestige.upgs.includes(21)?1.15:1)
+        .pow(player.chal.includes(22)?0.5:1)
         .div(player.chal.includes(21)?(player.number.add(1).cbrt()):1)
         :0 },
     dt_merges: () => {
@@ -34,16 +35,19 @@ const FORMULA = {
         .mul(FORMULA.particles_eff.n_effect())
         .mul(player.chalCompleted.includes(11)?CHALLENGES[11].cur():1)
         .mul(player.chal.includes(11)?0:1)
+        .pow(player.chal.includes(22)?0.5:1)
     },
     energy_gain: () => { return (player.energy.upgs.includes(13)?UPGRADE.energy[13].cur():E(1))
         .mul(FORMULA.particles_eff.p_effect()
         .mul(player.energy.upgs.includes(23)?UPGRADE.energy[23].cur():1))
         .mul(player.chal.includes(12)?0:1)
+        .pow(player.chal.includes(22)?0.5:1)
     },
     energy_effect: () => { return player.energy.stats.add(1).pow(player.prestige.upgs.includes(31)?0.95:0.75) },
     sacr_gain: () => { return player.prestige.stats.add(1).log10().mul(player.energy.stats.add(1).log10().pow(1.5))
         .mul(player.sacrifice.upgs.includes(21)?UPGRADE.sacrifice[21].cur():1)
         .mul(player.sacrifice.upgs.includes(22)?UPGRADE.sacrifice[22].cur():1)
+        .mul(player.sacrifice.upgs.includes(33)?UPGRADE.sacrifice[33].cur():1)
         .mul(FORMULA.preons_effect())
     },
     sacr_effect: () => { return player.sacrifice.stats.pow(1.15).mul(player.sacrifice.upgs.includes(11)?UPGRADE.sacrifice[11].cur():1)
@@ -62,8 +66,13 @@ const FORMULA = {
         .mul(player.preons.upgs.includes(11)?UPGRADE.preons[11].cur():1)
         .mul(player.preons.upgs.includes(12)?UPGRADE.preons[12].cur():1)
         .mul(player.preons.upgs.includes(13)?UPGRADE.preons[13].cur():1)
+        .mul(player.chalCompleted.includes(22)?CHALLENGES[22].cur():1)
     :E(0)},
-    preons_effect: () => { return player.preons.stats.add(1).log10().add(1).mul(player.preons.upgs.includes(14)?UPGRADE.preons[14].cur():1) },
+    preons_effect: () => { return player.preons.stats.add(1).log10().add(1)
+        .mul(player.preons.upgs.includes(14)?UPGRADE.preons[14].cur():1)
+        .mul(player.preons.upgs.includes(22)?UPGRADE.preons[22].cur():1)
+        .mul(player.preons.upgs.includes(23)?UPGRADE.preons[23].cur():1)
+    },
 }
 
 const TABS = [
@@ -214,7 +223,7 @@ const UPGRADE = {
     },
     sacrifice: {
         row: 3,
-        col: 2,
+        col: 3,
         11: {
             desc: 'Numbers boost Particles gain.',
             unl: () => { return true },
@@ -253,10 +262,30 @@ const UPGRADE = {
             unl: () => { return player.sacrifice.upgs.includes(13) },
             cost: () => { return E(5e3) },
         },
+        31: {
+            desc: 'You keep all Prestige upgrades upon sacrificing.',
+            unl: () => { return player.sacrifice.upgs.includes(23) & player.preons.upgs.includes(21) },
+            cost: () => { return E(1e6) },
+        },
+        32: {
+            desc: 'You keep all Energy upgrades upon sacrificing.',
+            unl: () => { return player.sacrifice.upgs.includes(23) & player.preons.upgs.includes(21) },
+            cost: () => { return E(1e7) },
+        },
+        33: {
+            desc: 'Protons, Neutrons & Electrons boost Sacrifice gain.',
+            unl: () => { return player.sacrifice.upgs.includes(23) & player.preons.upgs.includes(21) },
+            cost: () => { return E(1e8) },
+            cur: () => { return player.sacrifice.particles.p.add(1).log10().add(1)
+                .add(player.sacrifice.particles.n.add(1).log10().add(1))
+                .add(player.sacrifice.particles.e.add(1).log10().add(1))
+            },
+            curDesc: (x) => { return notate(x)+'x' },
+        },
     },
     preons: {
         row: 4,
-        col: 1,
+        col: 2,
         11: {
             desc: 'Multiply Preon production based on Energy Stat.',
             unl: () => { return true },
@@ -284,6 +313,30 @@ const UPGRADE = {
             cost: () => { return E(1e6) },
             cur: () => { return player.sacrifice.particles.n.add(1).log10().add(1) },
             curDesc: (x) => { return notate(x)+'x' },
+        },
+        21: {
+            desc: 'You unlock 3 more Sacrifice upgrades.',
+            unl: () => { return player.preons.upgs.includes(14) },
+            cost: () => { return E(5e6) },
+        },
+        22: {
+            desc: 'Your Preon effect is multiplied based off of protons.',
+            unl: () => { return player.preons.upgs.includes(14) },
+            cost: () => { return E(1e7) },
+            cur: () => { return player.sacrifice.particles.p.add(1).log10().add(1) },
+            curDesc: (x) => { return notate(x)+'x' },
+        },
+        23: {
+            desc: 'Your Preon effect is multiplied based off of electrons.',
+            unl: () => { return player.preons.upgs.includes(14) },
+            cost: () => { return E(5e7) },
+            cur: () => { return player.sacrifice.particles.e.add(1).log10().add(1) },
+            curDesc: (x) => { return notate(x)+'x' },
+        },
+        24: {
+            desc: 'Placeholder.',
+            unl: () => { return false },
+            cost: () => { return E(1/0) },
         },
     },
 }
@@ -319,11 +372,13 @@ const CHALLENGES = {
         curDesc: (x) => { return notate(x)+'x' },
     },
     22: {
-        title: 'Placeholder',
-        desc: 'Placeholder.',
-        reward: 'Placeholder.',
-        goal: E(1/0),
-        unl: () => { return false },
+        title: 'Lower-Points',
+        desc: 'Raise all pre-Sacrifice productions by 0.5.',
+        reward: 'Numbers boost Preons gain.',
+        goal: E(1e20),
+        unl: () => { return player.chalCompleted.includes(11) & player.chalCompleted.includes(12) },
+        cur: () => { return player.number.add(1).log10().add(1) },
+        curDesc: (x) => { return notate(x)+'x' },
     },
 }
 
@@ -356,16 +411,12 @@ function startChal(id) {
 
 function resetChal() {
     player.number = E(0)
-    player.prestige = {
-        points: E(0),
-        stats: E(0),
-        upgs: [],
-    }
-    player.energy = {
-        points: E(0),
-        stats: E(0),
-        upgs: [],
-    }
+    player.prestige.points = E(0)
+    player.prestige.stats = E(0)
+    if (!player.sacrifice.upgs.includes(31)) player.prestige.upgs = []
+    player.energy.points = E(0)
+    player.energy.stats = E(0)
+    if (!player.sacrifice.upgs.includes(32)) player.energy.upgs = []
     player.merges = [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
     player.minMergeLevel = 1
     player.ticks = 0
@@ -395,20 +446,7 @@ function resetSacrifice() {
     if (FORMULA.sacr_gain().gte(20)) {
         player.sacrifice.points = player.sacrifice.points.add(FORMULA.sacr_gain())
         player.sacrifice.stats = player.sacrifice.stats.add(FORMULA.sacr_gain())
-        player.prestige = {
-            points: E(0),
-            stats: E(0),
-            upgs: [],
-        }
-        player.energy = {
-            points: E(0),
-            stats: E(0),
-            upgs: [],
-        }
-        player.number = E(0)
-        player.merges = [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-        player.minMergeLevel = 1
-        player.ticks = 0
+        resetChal()
     }
 }
 
@@ -466,4 +504,4 @@ function loop(){
     date = Date.now();
 }
 
-setInterval(loop, 50)
+setInterval(loop, 33)

@@ -79,7 +79,7 @@ function save(){
 }
     
 function load(x){
-    if(typeof x == "string"){
+    if(typeof x == "string" & x != ''){
         loadPlayer(JSON.parse(atob(x)))
     } else {
         wipe()
