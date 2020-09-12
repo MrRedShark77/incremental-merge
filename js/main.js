@@ -580,6 +580,7 @@ function atomize() {
             player.atoms.points = player.atoms.points.add(FORMULA.atoms_gain())
             player.atoms.stats = player.atoms.stats.add(1)
             player.unlocks = ['atoms', 'challenges']
+            if (player.atoms.stats.gte(ATOMS.milestones[13].req)) player.unlocks.push('sacrifice')
             player.chal = []
             player.chalCompleted = []
             player.number = E(0)
