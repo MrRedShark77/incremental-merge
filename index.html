@@ -78,7 +78,7 @@
             </div><div id="Atoms" style="display: none;">
                 <button class="atoms" onclick="atomize()">Reset ALL prevoius progress to gain<br>{{ notate(FORMULA.atoms_gain()) }} Atoms</button><br><br>
                 You have <h2>{{ notate(player.atoms.points) }}</h2> Atoms<br><br>
-                You atomized {{ notate(player.atoms.stats) }} times
+                You atomized {{ notate(player.atoms.stats,0) }} times
                 <br><br>
                 <div class="table_center">
                     <div v-for='s in STABS'>

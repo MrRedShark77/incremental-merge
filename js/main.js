@@ -59,6 +59,7 @@ const FORMULA = {
         .mul(player.energy.upgs.includes(23)?UPGRADE.energy[23].cur():1))
         .mul(player.chal.includes(12)?0:1)
         .mul(player.atoms.stats.gte(1)?ATOMS.cur[2][0][0]():1)
+        .mul(player.chalCompleted.includes(12)?CHALLENGES[12].cur():1)
         .pow(player.chal.includes(22)?0.5:1)
     },
     energy_effect: () => { return player.energy.stats.add(1).pow(player.prestige.upgs.includes(31)?0.95:0.75) },
