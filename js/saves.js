@@ -10,7 +10,7 @@ function ex(x){
 }
 
 function calc(dt) {
-    if (ticks < UPGRADE.merges[1].cur() & (FORMULA.merges_have() < 20 || player.prestige.upgs.includes(12))) ticks += dt * (player.prestige.upgs.includes(13)?UPGRADE.prestige[13].cur().toNumber():1)
+    if (ticks < UPGRADE.merges[1].cur() & (FORMULA.merges_have(player.merges) < player.merges.length || player.prestige.upgs.includes(12))) ticks += dt * (player.prestige.upgs.includes(13)?UPGRADE.prestige[13].cur().toNumber():1)
     if (ticks >= UPGRADE.merges[1].cur()) {
         addMerge()
         if (player.prestige.upgs.includes(12)) mergeAll()
@@ -24,6 +24,9 @@ function calc(dt) {
     let pr_gain = player.prestige.upgs.includes(22)?FORMULA.prestige_gain().mul(dt / 100000):0
     player.prestige.points = player.prestige.points.add(pr_gain)
     player.prestige.stats = player.prestige.stats.add(pr_gain)
+    let sc_gain = player.preons.upgs.includes(24)?FORMULA.sacr_gain().mul(dt / 100000):0
+    player.sacrifice.points = player.sacrifice.points.add(sc_gain)
+    player.sacrifice.stats = player.sacrifice.stats.add(sc_gain)
     for (let i = 0; i < 3; i++) {
         player.sacrifice.particles[particles[i]] = player.sacrifice.particles[particles[i]].add(FORMULA.particles_gain(i).mul(dt / 1000))
     }
@@ -32,6 +35,13 @@ function calc(dt) {
     }
     player.preons.points = player.preons.points.add(FORMULA.preons_gain().mul(dt/1000))
     player.preons.stats = player.preons.stats.add(FORMULA.preons_gain().mul(dt/1000))
+    for (let i = 0; i < 8; i++) {
+        let gain = FORMULA.dt_atom_merges()[ATOMCOLORS[i]]
+        player.atoms.dusts[ATOMCOLORS[i]] = player.atoms.dusts[ATOMCOLORS[i]].add(gain?gain.mul(dt/1000):0)
+    }
+    if (ATOMS.cur[5][0][0]().gt(player.merges.length-20)) {
+        player.merges.push(0)
+    }
 }
 
 function wipe() {
@@ -62,15 +72,24 @@ function wipe() {
             stats: E(0),
             upgs: [],
         },
+        atoms: {
+            points: E(0),
+            stats: E(0),
+            dusts: {},
+            upgs: [],
+        },
         chal: [],
         chalCompleted: [],
         unlocks: [],
         merges: [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+        atom_merges: [],
         minMergeLevel: 1,
         bestMergeLevel: 1,
         ticks: 0,
         achievements: [],
     }
+    for (let i = 0; i < 8; i++) player.atoms.dusts[ATOMCOLORS[i]] = E(0)
+    for (let i = 0; i < 20; i++) player.atom_merges.push([0, ATOMCOLORS[Math.floor(Math.random() * 8)]])
 }
 
 function save(){
@@ -83,6 +102,23 @@ function load(x){
         loadPlayer(JSON.parse(atob(x)))
     } else {
         wipe()
+    }
+}
+
+function exporty() {
+    save();
+    let file = new Blob([btoa(JSON.stringify(player))], {type: "text/plain"})
+    window.URL = window.URL || window.webkitURL;
+    let a = document.createElement("a")
+    a.href = window.URL.createObjectURL(file)
+    a.download = "Incremental Merge Save.txt"
+    a.click()
+}
+
+function importy() {
+    let loadgame = prompt("Paste in your save WARNING: WILL OVERWRITE YOUR CURRENT SAVE")
+    if (loadgame != "") {
+        load(loadgame)
     }
 }
 
@@ -121,6 +157,16 @@ function loadPlayer(load) {
         stats: ex(load.preons.stats),
         upgs: load.preons.upgs,
     }
+    if (load.atoms != undefined) {
+        player.atoms = {
+            points: ex(load.atoms.points),
+            stats: ex(load.atoms.stats),
+            dusts: {},
+            upgs: load.atoms.upgs,
+        }
+        for (let i = 0; i < 8; i++) player.atoms.dusts[ATOMCOLORS[i]] = ex(load.atoms.dusts[ATOMCOLORS[i]])
+    }
+    if (load.atom_merges != undefined) player.atom_merges = load.atom_merges
 }
 
 function loadGame() {

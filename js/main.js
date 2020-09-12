@@ -4,6 +4,7 @@ var date = Date.now();
 var player;
 var ticks = 0;
 var tab = 'Merges'
+var stab = 'Atom-Merges'
 var particles = ['p','n','e']
 var large_particles = ['Proton','Neutron','Electron']
 var chal = []
@@ -14,19 +15,34 @@ const FORMULA = {
         .mul(FORMULA.prestige_effect())
         .mul(FORMULA.energy_effect())
         .mul(player.chalCompleted.includes(21)?CHALLENGES[21].cur():1)
+        .mul(player.atoms.stats.gte(1)?ATOMS.cur[0][0][0]():1)
         .pow(player.prestige.upgs.includes(21)?1.15:1)
         .pow(player.chal.includes(22)?0.5:1)
         .div(player.chal.includes(21)?(player.number.add(1).cbrt()):1)
         :0 },
+    atom_merge_effect: (x) => { return (x > 0)?E(5).pow(x-1):0 },
     dt_merges: () => {
         let sum = E(0)
         for (let i = 0; i < player.merges.length; i++) sum = sum.add(FORMULA.merge_effect(player.merges[i]))
         return sum
     },
+    dt_atom_merges: () => {
+        let obj = {}
+        for (let i = 0; i < player.atom_merges.length; i++) {
+            if (!obj[player.atom_merges[i][1]]) obj[player.atom_merges[i][1]] = E(0)
+            obj[player.atom_merges[i][1]] = obj[player.atom_merges[i][1]].add(FORMULA.atom_merge_effect(player.atom_merges[i][0]))
+        }
+        return obj
+    },
     times: () => { return (UPGRADE.merges[1].cur() - ticks < 0)?0:((UPGRADE.merges[1].cur()-ticks)/1000) },
-    merges_have: () => {
+    merges_have: (arr) => {
         let merge = 0
-        for (let i = 0; i < player.merges.length; i++) if (player.merges[i]!=0) merge++
+        for (let i = 0; i < arr.length; i++) if (arr[i]>0) merge++
+        return merge
+    },
+    atom_merges_have: (arr) => {
+        let merge = 0
+        for (let i = 0; i < arr.length; i++) if (arr[i][0]>0) merge++
         return merge
     },
     prestige_effect: () => { return player.prestige.stats.div(100).add(1).pow(player.energy.upgs.includes(21)?1.15:1) },
@@ -35,12 +51,14 @@ const FORMULA = {
         .mul(FORMULA.particles_eff.n_effect())
         .mul(player.chalCompleted.includes(11)?CHALLENGES[11].cur():1)
         .mul(player.chal.includes(11)?0:1)
+        .mul(player.atoms.stats.gte(1)?ATOMS.cur[1][0][0]():1)
         .pow(player.chal.includes(22)?0.5:1)
     },
     energy_gain: () => { return (player.energy.upgs.includes(13)?UPGRADE.energy[13].cur():E(1))
         .mul(FORMULA.particles_eff.p_effect()
         .mul(player.energy.upgs.includes(23)?UPGRADE.energy[23].cur():1))
         .mul(player.chal.includes(12)?0:1)
+        .mul(player.atoms.stats.gte(1)?ATOMS.cur[2][0][0]():1)
         .pow(player.chal.includes(22)?0.5:1)
     },
     energy_effect: () => { return player.energy.stats.add(1).pow(player.prestige.upgs.includes(31)?0.95:0.75) },
@@ -49,6 +67,7 @@ const FORMULA = {
         .mul(player.sacrifice.upgs.includes(22)?UPGRADE.sacrifice[22].cur():1)
         .mul(player.sacrifice.upgs.includes(33)?UPGRADE.sacrifice[33].cur():1)
         .mul(FORMULA.preons_effect())
+        .mul(player.atoms.stats.gte(1)?ATOMS.cur[3][0][0]():1)
     },
     sacr_effect: () => { return player.sacrifice.stats.pow(1.15).mul(player.sacrifice.upgs.includes(11)?UPGRADE.sacrifice[11].cur():1)
         .mul(FORMULA.preons_effect())
@@ -66,13 +85,17 @@ const FORMULA = {
         .mul(player.preons.upgs.includes(11)?UPGRADE.preons[11].cur():1)
         .mul(player.preons.upgs.includes(12)?UPGRADE.preons[12].cur():1)
         .mul(player.preons.upgs.includes(13)?UPGRADE.preons[13].cur():1)
+        .mul(player.preons.upgs.includes(33)?UPGRADE.preons[33].cur():1)
+        .mul(player.atoms.stats.gte(1)?ATOMS.cur[4][0][0]():1)
         .mul(player.chalCompleted.includes(22)?CHALLENGES[22].cur():1)
     :E(0)},
     preons_effect: () => { return player.preons.stats.add(1).log10().add(1)
         .mul(player.preons.upgs.includes(14)?UPGRADE.preons[14].cur():1)
         .mul(player.preons.upgs.includes(22)?UPGRADE.preons[22].cur():1)
         .mul(player.preons.upgs.includes(23)?UPGRADE.preons[23].cur():1)
+        .pow(player.atoms.stats.gte(1)?ATOMS.cur[4][1][0]():1)
     },
+    atoms_gain: () => { return player.sacrifice.particles.p.add(1).mul(player.sacrifice.particles.n.add(1)).mul(player.sacrifice.particles.e.add(1)).log10().div(50) },
 }
 
 const TABS = [
@@ -81,9 +104,15 @@ const TABS = [
     'Energy',
     'Sacrifice',
     'Preons',
+    'Atoms',
     'Challenges',
     'Achievements',
     'Options',
+]
+
+const STABS = [
+    'Atom-Merges',
+    "Atom Dusts",
 ]
 
 const TABS_UNL = {
@@ -95,6 +124,7 @@ const TABS_UNL = {
     'Sacrifice': () => { return player.unlocks.includes('sacrifice') },
     'Challenges': () => { return player.unlocks.includes('challenges') },
     'Preons': () => { return player.sacrifice.upgs.includes(23) },
+    'Atoms': () => { return player.unlocks.includes('atoms') },
 }
 
 const UPGRADE = {
@@ -228,7 +258,7 @@ const UPGRADE = {
             desc: 'Numbers boost Particles gain.',
             unl: () => { return true },
             cost: () => { return E(25) },
-            cur: () => { return player.number.add(1).log10().add(1).sqrt() },
+            cur: () => { return player.number.add(1).log10().add(1).pow(player.preons.upgs.includes(32)?1.5:0.5) },
             curDesc: (x) => { return notate(x)+'x' },
         },
         12: {
@@ -285,7 +315,7 @@ const UPGRADE = {
     },
     preons: {
         row: 4,
-        col: 2,
+        col: 3,
         11: {
             desc: 'Multiply Preon production based on Energy Stat.',
             unl: () => { return true },
@@ -334,15 +364,37 @@ const UPGRADE = {
             curDesc: (x) => { return notate(x)+'x' },
         },
         24: {
-            desc: 'Placeholder.',
-            unl: () => { return false },
-            cost: () => { return E(1/0) },
+            desc: 'Gain 1% Sacrifice Points/s.',
+            unl: () => { return player.preons.upgs.includes(14) },
+            cost: () => { return E(1e9) },
+        },
+        31: {
+            desc: 'Unlock 5th Challenge.',
+            unl: () => { return player.preons.upgs.includes(24) },
+            cost: () => { return E(2.5e9) },
+        },
+        32: {
+            desc: '1st Sacrifice upgrade formula is better.',
+            unl: () => { return player.preons.upgs.includes(24) },
+            cost: () => { return E(5e9) },
+        },
+        33: {
+            desc: 'Highest Merge Tier boost Preons gain.',
+            unl: () => { return player.preons.upgs.includes(24) },
+            cost: () => { return E(1e10) },
+            cur: () => { return E(player.bestMergeLevel).add(1).pow(0.75) },
+            curDesc: (x) => { return notate(x)+'x' },
+        },
+        34: {
+            desc: 'Unlock Atoms.',
+            unl: () => { return player.preons.upgs.includes(24) },
+            cost: () => { return E(1e11) },
         },
     },
 }
 
 const CHALLENGES = {
-    col: 2,
+    col: 3,
     row: 2,
     11: {
         title: 'Non-Prestige',
@@ -379,6 +431,22 @@ const CHALLENGES = {
         unl: () => { return player.chalCompleted.includes(11) & player.chalCompleted.includes(12) },
         cur: () => { return player.number.add(1).log10().add(1) },
         curDesc: (x) => { return notate(x)+'x' },
+    },
+    31: {
+        title: 'Non-Merge',
+        desc: 'You cannot merge mergers (like Non-Energy).',
+        reward: 'Every time you merge, you have a chance based on your number go up by 2 instead of one for the same price.',
+        goal: E(1e125),
+        unl: () => { return player.preons.upgs.includes(31) },
+        cur: () => { return player.number.add(1).log10().add(1).logBase(2) },
+        curDesc: (x) => { return notate(x)+'%' },
+    },
+    32: {
+        title: 'Placeholder',
+        desc: 'Placeholder.',
+        reward: 'Placeholder.',
+        goal: E(1/0),
+        unl: () => { return false },
     },
 }
 
@@ -428,6 +496,7 @@ function buyUPG(upg, id) {
         player[upg].points = player[upg].points.sub(cost)
         player[upg].upgs.push(id)
         if (upg == 'prestige' & id == 23 & !player.unlocks.includes('sacrifice')) player.unlocks.push('sacrifice')
+        if (upg == 'preons' & id == 34 & !player.unlocks.includes('atoms')) player.unlocks.push('atoms')
     }
 }
 
@@ -450,35 +519,114 @@ function resetSacrifice() {
     }
 }
 
+function atomize() {
+    if (FORMULA.atoms_gain().gte(1)) {
+        if (confirm('Are you really atomize? Reset all previous progress to gain Atoms! Ready?')) {
+            player.atoms.points = player.atoms.points.add(FORMULA.atoms_gain())
+            player.atoms.stats = player.atoms.stats.add(1)
+            player.unlocks = ['atoms', 'challenges']
+            player.chal = []
+            player.chalCompleted = []
+            player.number = E(0)
+            player.prestige.points = E(0)
+            player.prestige.stats = E(0)
+            player.prestige.upgs = []
+            player.energy.points = E(0)
+            player.energy.stats = E(0)
+            player.energy.upgs = []
+            player.merges = [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+            player.minMergeLevel = 1
+            player.ticks = 0
+            player.sacrifice = {
+                points: E(0),
+                stats: E(0),
+                upgs: [],
+                particles: {
+                    p: E(0),
+                    n: E(0),
+                    e: E(0),
+                }
+            }
+            player.preons = {
+                points: E(0),
+                stats: E(0),
+                upgs: [],
+            }
+        }
+    }
+}
+
 function changeTab(curTab) {
     document.getElementById(tab).style.display = 'none'
     tab = curTab
     document.getElementById(tab).style.display = ''
 }
 
+function changeSTab(curTab) {
+    document.getElementById(stab).style.display = 'none'
+    stab = curTab
+    document.getElementById(stab).style.display = ''
+}
+
 function addMerge() {
     for (let i = 0; i < player.merges.length; i++) if (player.merges[i] == 0) {
         player.merges[i] = player.minMergeLevel;
+        let chance = E(Math.random() * 101).lte(player.atoms.stats.gte(1)?ATOMS.cur[6][0][0]():-1)
+        if (chance) player.merges[i]++
         break;
     }
 }
 
+function addAtomMerge() {
+    if (player.atoms.points.gte(1) && FORMULA.atom_merges_have(player.atom_merges) < 20) {
+        player.atoms.points = player.atoms.points.sub(1)
+        for (let i = 0; i < player.atom_merges.length; i++) if (player.atom_merges[i][0] == 0) {
+            player.atom_merges[i][0] = 1
+            player.atom_merges[i][1] = ATOMCOLORS[Math.floor(Math.random() * 8)]
+            break
+        }
+    }
+}
+
 function mergeAll() {
-    if (player.merges.length > 1) {
+    if (player.merges.length > 1 & !player.chal.includes(31)) {
         for (let i = 0; i < player.merges.length - 1; i++){
             for (let j = i+1; j < player.merges.length; j++){
                 if(player.merges[i] == player.merges[j] && player.merges[i] != 0 && player.merges[j] != 0){
-                    let chance = E(Math.random() * 101).lte(E(1).mul(player.energy.upgs.includes(11)?UPGRADE.energy[11].cur():1).mul(player.sacrifice.upgs.includes(12)?UPGRADE.sacrifice[12].cur():1))
+                    let chance = E(Math.random() * 101).lte(E(1).mul(player.energy.upgs.includes(11)?UPGRADE.energy[11].cur():1).mul(player.sacrifice.upgs.includes(12)?UPGRADE.sacrifice[12].cur():1).add(player.atoms.stats.gte(1)?ATOMS.cur[2][1][0]():1))
                     if (chance) {
                         let gain = FORMULA.energy_gain()
                         player.energy.points = player.energy.points.add(gain)
                         player.energy.stats = player.energy.stats.add(gain)
                     }
+                    chance = E(Math.random() * 101).lte(E(player.chalCompleted.includes(31)?CHALLENGES[31].cur():-1).add(player.atoms.stats.gte(1)?ATOMS.cur[7][0][0]().add(1):0))
+                    if (chance) player.merges[i]++
                     player.merges[i]++
                     if (player.merges[i] > player.bestMergeLevel) player.bestMergeLevel = player.merges[i]
                     player.merges[j] = 0
                     break;
                 }
+            }
+        }
+    }
+}
+
+function atom_mergeALL() {
+    if (player.atom_merges.length > 2) {
+        for (let i = 0; i < player.atom_merges.length-2; i++) {
+            let merged = false
+            for (let j = i+1; j < player.atom_merges.length-1; j++) {
+                for (let k = j+1; k < player.atom_merges.length; k++) {
+                    if((player.atom_merges[i][0]==player.atom_merges[j][0] && player.atom_merges[j][0]==player.atom_merges[k][0] && player.atom_merges[i][0]==player.atom_merges[k][0]) && player.atom_merges[i][0]>0 && player.atom_merges[j][0]>0 && player.atom_merges[k][0]>0) {
+                        player.atom_merges[i][0]++
+                        player.atom_merges[i][1]=ATOMCOLORS[Math.floor(Math.random() * 8)]
+                        player.atom_merges[j][0]=0
+                        player.atom_merges[k][0]=0
+                        merged = true
+                        break
+                    }
+                }
+                if (merged) break
             }
         }
     }

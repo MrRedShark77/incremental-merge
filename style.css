@@ -33,6 +33,12 @@ button {
     font-size: 15px;
 }
 
+.mergebox.atombox {
+    border: solid 3px black;
+    color: black;
+    background-color: white;
+}
+
 .tabbox {
     height: 50px;
     font-size: 30px;
@@ -50,7 +56,7 @@ button {
 		purple 15%,
 		magenta 30%
 	);
-    animation: BackgroundGradientSacrifice 6s ease infinite;
+    animation: BackgroundGradientSacrifice1 6s ease infinite;
 }
 
 .preons {
@@ -58,7 +64,7 @@ button {
     background: linear-gradient(90deg, rgba(0,7,143,1) 0%, rgba(43,43,43,1) 50%, rgba(255,0,0,1) 100%);
 }
 
-@keyframes BackgroundGradientSacrifice {
+@keyframes BackgroundGradientSacrifice1 {
     0% {
 		background-size: 100% 100%;
 	}
@@ -88,7 +94,7 @@ button {
     border-radius: 15%;
     margin: 3px;
     padding: 3px;
-    animation: BackgroundGradientSacrifice 6s ease infinite;
+    animation: BackgroundGradientSacrifice1 6s ease infinite;
 }
 
 .particles.p {
@@ -156,4 +162,79 @@ h1, h2 {
 
 .bought {
     background-color: lime;
+}
+
+.atoms {
+    color: red;
+    border-color: red;
+    background-color: black;
+    animation: BackgroundGradientSacrifice2 3s ease infinite;
+}
+
+@keyframes BackgroundGradientSacrifice2 {
+    0% {
+		background-color: black;
+	}
+	50% {
+        background-color: rgb(71, 0, 0);
+	}
+	100% {
+		background-color: black;
+	}
+}
+
+.atombox.red,
+.atom_dusts.red {
+    color: white;
+    background-color: red;
+}
+
+.atombox.ora,
+.atom_dusts.ora {
+    background-color: orange;
+}
+
+.atombox.yel,
+.atom_dusts.yel {
+    background-color: yellow;
+}
+
+.atombox.gre,
+.atom_dusts.gre {
+    background-color: green;
+}
+
+.atombox.blu,
+.atom_dusts.blu {
+    color: white;
+    background-color: blue;
+}
+
+.atombox.pur,
+.atom_dusts.pur {
+    color: white;
+    background-color: purple;
+}
+
+.atombox.whi,
+.atom_dusts.whi {
+    background-color: white;
+}
+
+.atombox.bla,
+.atom_dusts.bla {
+    color: white;
+    background-color: black;
+    border-color: white;
+}
+
+.atom_dusts {
+    border: solid 3px black;
+    color: black;
+    background-color: white;
+    width: 250px;
+    height: 250px;
+    border-radius: 15%;
+    margin: 3px;
+    padding: 3px;
 }

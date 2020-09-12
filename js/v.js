@@ -10,6 +10,7 @@ function loadVue() {
             tab,
             notate,
             changeTab,
+            changeSTab,
             buyUPG,
             startChal,
             chalText,
@@ -17,6 +18,9 @@ function loadVue() {
             FORMULA,
             UPGRADE,
             TABS,
+            STABS,
+            ATOMS,
+            ATOMCOLORS,
             CHALLENGES,
             ACHIEVEMENTS,
         }
