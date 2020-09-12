@@ -42,6 +42,7 @@ function calc(dt) {
     if (ATOMS.cur[5][0][0]().gt(player.merges.length-20)) {
         player.merges.push(0)
     }
+    if (!player.unlocks.includes('sacrifice') & player.prestige.upgs.includes(23)) player.unlocks.push('sacrifice')
 }
 
 function wipe() {
