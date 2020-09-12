@@ -238,3 +238,15 @@ h1, h2 {
     margin: 3px;
     padding: 3px;
 }
+
+.milestones {
+    width: 300px;
+    height: 75px;
+    border: solid 3px red;
+    margin: 3px;
+    padding: 3px;
+}
+
+.milestones.reached {
+    border-color: green;
+}
