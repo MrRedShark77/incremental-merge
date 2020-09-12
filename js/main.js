@@ -334,12 +334,12 @@ const UPGRADE = {
         },
         31: {
             desc: 'You keep all Prestige upgrades upon sacrificing.',
-            unl: () => { return player.sacrifice.upgs.includes(23) & player.preons.upgs.includes(21) & !player.atoms.stats.gte(ATOMS.milestones[13].req) },
+            unl: () => { return player.sacrifice.upgs.includes(23) & player.preons.upgs.includes(21) & !player.atoms.stats.gte(ATOMS.milestones[21].req) },
             cost: () => { return E(1e6) },
         },
         32: {
             desc: 'You keep all Energy upgrades upon sacrificing.',
-            unl: () => { return player.sacrifice.upgs.includes(23) & player.preons.upgs.includes(21) & !player.atoms.stats.gte(ATOMS.milestones[13].req) },
+            unl: () => { return player.sacrifice.upgs.includes(23) & player.preons.upgs.includes(21) & !player.atoms.stats.gte(ATOMS.milestones[21].req) },
             cost: () => { return E(1e7) },
         },
         33: {
@@ -536,10 +536,10 @@ function resetChal() {
     player.number = E(0)
     player.prestige.points = E(0)
     player.prestige.stats = E(0)
-    if (!player.sacrifice.upgs.includes(31) & !player.atoms.stats.gte(ATOMS.milestones[13].req)) player.prestige.upgs = []
+    if (!player.sacrifice.upgs.includes(31) & !player.atoms.stats.gte(ATOMS.milestones[21].req)) player.prestige.upgs = []
     player.energy.points = E(0)
     player.energy.stats = E(0)
-    if (!player.sacrifice.upgs.includes(32) & !player.atoms.stats.gte(ATOMS.milestones[13].req)) player.energy.upgs = []
+    if (!player.sacrifice.upgs.includes(32) & !player.atoms.stats.gte(ATOMS.milestones[21].req)) player.energy.upgs = []
     player.merges = [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
     player.minMergeLevel = 1
     player.ticks = 0
@@ -580,16 +580,16 @@ function atomize() {
             player.atoms.points = player.atoms.points.add(FORMULA.atoms_gain())
             player.atoms.stats = player.atoms.stats.add(1)
             player.unlocks = ['atoms', 'challenges']
-            if (player.atoms.stats.gte(ATOMS.milestones[13].req)) player.unlocks.push('sacrifice')
+            if (player.atoms.stats.gte(ATOMS.milestones[21].req)) player.unlocks.push('sacrifice')
             player.chal = []
-            player.chalCompleted = []
+            if (!player.atoms.stats.gte(ATOMS.milestones[13].req)) player.chalCompleted = []
             player.number = E(0)
             player.prestige.points = E(0)
             player.prestige.stats = E(0)
-            if (!player.atoms.stats.gte(ATOMS.milestones[13].req)) player.prestige.upgs = []
+            if (!player.atoms.stats.gte(ATOMS.milestones[21].req)) player.prestige.upgs = []
             player.energy.points = E(0)
             player.energy.stats = E(0)
-            if (!player.atoms.stats.gte(ATOMS.milestones[13].req)) player.energy.upgs = []
+            if (!player.atoms.stats.gte(ATOMS.milestones[21].req)) player.energy.upgs = []
             player.merges = [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
             player.minMergeLevel = 1
             player.ticks = 0

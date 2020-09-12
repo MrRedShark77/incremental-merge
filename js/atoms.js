@@ -45,7 +45,7 @@ const ATOMS = {
         [[() => { return player.atoms.dusts.bla.add(1).logBase(3).min(75) }, (x) => { return notate(x)+'%' }], false],
     ],
     milestones: {
-        col: 1,
+        col: 2,
         row: 3,
         11: {
             desc: 'Unlock 3 new Sacrifice upgrades.',
@@ -56,8 +56,20 @@ const ATOMS = {
             req: E(2),
         },
         13: {
-            desc: 'Keep Prestige & Energy on Atomize (instead of 4 & 5 Sacrifice upgrades).',
+            desc: 'Keep Challenges on Atomize.',
             req: E(4),
+        },
+        21: {
+            desc: 'Keep Prestige & Energy on Atomize (instead of 4 & 5 Sacrifice upgrades).',
+            req: E(8),
+        },
+        22: {
+            desc: 'Placeholder.',
+            req: E(16),
+        },
+        23: {
+            desc: 'Placeholder.',
+            req: E(32),
         },
     },
 }
