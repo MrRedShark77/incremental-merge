@@ -17,23 +17,26 @@
         Number is getting <h2>{{ notate(FORMULA.dt_merges(),0) }}</h2>/s<br><br>
         <div class="table_center">
             <div v-for='s in TABS'>
-                <button class="tabbox" v-on:click='changeTab(s)' v-bind:class="{energy: s == 'Energy', sacrifice: s == 'Sacrifice', preons: s == 'Preons', atoms: s == 'Atoms'}" v-if="TABS_UNL[s]()">{{ s }}</button>
+                <button class="tabbox" v-on:click='player.tab = TABS.indexOf(s)' v-bind:class="{energy: s == 'Energy', sacrifice: s == 'Sacrifice', preons: s == 'Preons', atoms: s == 'Atoms'}" v-if="TABS_UNL[s]()">{{ s }}</button>
             </div>
         </div><br><div>
-            <div id='Merges'>
+            <div v-if='player.tab == 0'>
                 <div style="border: solid 3px white; border-radius: 25px; padding: 10px;">
                     <button onclick="mergeAll()">MERGE</button>
                     ({{ FORMULA.merges_have(player.merges) }} / {{ player.merges.length }}) Merger will added on {{ notate(FORMULA.times(), 1) }}s<br><br>
                     <div v-bind:class="{mergebox: true}" v-for='merge in player.merges' v-if='merge > 0'>
-                        <br><br><h2 style="font-size: 35px;">[{{ merge }}]</h2>
-                        <br><br>+{{ notate(FORMULA.merge_effect(merge),0) }}
+                        <br><br><h2 style="font-size: 25px;">[{{ notate(merge,0) }}]</h2>
+                        <br><br><br>+{{ notate(FORMULA.merge_effect(merge),0) }}
                     </div>
                 </div><br><div class="table_center">
                     <div v-for='upg in UPGRADE.merges'>
                         <button class="upg" v-on:click='upg.buy()' v-bind:class='{closed: player.number.lt(upg.cost())}'>{{ upg.desc }} [{{ upg.level() }}]<br>Cost: {{ notate(upg.cost(),0) }}<br><span v-if='upg.cur'>Effect: {{ upg.curDesc(upg.cur()) }}</span></button>
+                        <br><div v-if='player.energy.upgs.includes(12)'>
+                            Auto-buy <input type="checkbox" v-model="player.autobuys.merges[upg.autobuy]">
+                        </div>
                     </div>
                 </div>
-            </div><div id="Prestige" style="display: none;">
+            </div><div v-if='player.tab == 1'>
                 You have <h2>{{ notate(player.prestige.points,0) }} [{{ notate(player.prestige.stats,0) }}]</h2> Prestige points, which multiples merges production by {{ notate(FORMULA.prestige_effect()) }}
                 <br><br><button onclick="resetPrestige()" v-bind:class='{closed: FORMULA.prestige_gain().lt(100)}'>Reset your merges and numbers, you gain {{ notate(FORMULA.prestige_gain(),0) }} Prestige points</button>
                 <br><br><div v-for='c in UPGRADE.prestige.col' class="table_center">
@@ -41,14 +44,14 @@
                         <button class="upg prestige" v-on:click='buyUPG("prestige",c*10+r)' v-if='UPGRADE.prestige[c*10+r].unl()' v-bind:class='{closed: player.prestige.points.lt(UPGRADE.prestige[c*10+r].cost()) & !player.prestige.upgs.includes(c*10+r), bought: player.prestige.upgs.includes(c*10+r)}'>{{ UPGRADE.prestige[c*10+r].desc }}<br>Cost: {{ notate(UPGRADE.prestige[c*10+r].cost(),0) }}<br><span v-if='UPGRADE.prestige[c*10+r].cur'>Currently: {{ UPGRADE.prestige[c*10+r].curDesc(UPGRADE.prestige[c*10+r].cur()) }}</span></button>
                     </div>
                 </div>
-            </div><div id="Energy" style="display: none;">
+            </div><div v-if='player.tab == 2'>
                 You have <h2>{{ notate(player.energy.points,0) }} [{{ notate(player.energy.stats,0) }}]</h2> Energy Points, which multiples merges production by {{ notate(FORMULA.energy_effect()) }}
                 <br><br><div v-for='c in UPGRADE.energy.col' class="table_center">
                     <div v-for='r in UPGRADE.energy.row'>
                         <button class="upg prestige" v-on:click='buyUPG("energy",c*10+r)' v-if='UPGRADE.energy[c*10+r].unl()' v-bind:class='{closed: player.energy.points.lt(UPGRADE.energy[c*10+r].cost()) & !player.energy.upgs.includes(c*10+r), bought: player.energy.upgs.includes(c*10+r)}'>{{ UPGRADE.energy[c*10+r].desc }}<br>Cost: {{ notate(UPGRADE.energy[c*10+r].cost(),0) }}<br><span v-if='UPGRADE.energy[c*10+r].cur'>Currently: {{ UPGRADE.energy[c*10+r].curDesc(UPGRADE.energy[c*10+r].cur()) }}</span></button>
                     </div>
                 </div>
-            </div><div id="Sacrifice" style="display: none;">
+            </div><div v-if='player.tab == 3'>
                 Reset your Numbers & Merges, if you Sacrificed only over 20 Sacrifice points to reset.<br>
                 <button onclick="resetSacrifice()" class="sacrifice">Sacrifice your Prestige & Energy<br>for {{ notate(FORMULA.sacr_gain()) }} Sacrifice points</button>
                 <br>You have <h2>{{ notate(player.sacrifice.points) }} [{{ notate(player.sacrifice.stats) }}]</h2> Sacrifice points, which generates {{ notate(FORMULA.sacr_effect()) }} Particles/s.
@@ -65,7 +68,7 @@
                         <button class="upg prestige" v-on:click='buyUPG("sacrifice",c*10+r)' v-if='UPGRADE.sacrifice[c*10+r].unl()' v-bind:class='{closed: player.sacrifice.points.lt(UPGRADE.sacrifice[c*10+r].cost()) & !player.sacrifice.upgs.includes(c*10+r), bought: player.sacrifice.upgs.includes(c*10+r)}'>{{ UPGRADE.sacrifice[c*10+r].desc }}<br>Cost: {{ notate(UPGRADE.sacrifice[c*10+r].cost(),0) }}<br><span v-if='UPGRADE.sacrifice[c*10+r].cur'>Currently: {{ UPGRADE.sacrifice[c*10+r].curDesc(UPGRADE.sacrifice[c*10+r].cur()) }}</span></button>
                     </div>
                 </div>
-            </div><div id="Preons" style="display: none;">
+            </div><div v-if='player.tab == 4'>
                 You have <h2>{{ notate(player.preons.points) }} [{{ notate(player.preons.stats) }}]</h2> (+{{ notate(FORMULA.preons_gain()) }}/s) Preons, which multiples Sacrifice & Particles gain by {{ notate(FORMULA.preons_effect()) }}
                 <br><br><div v-for='c in UPGRADE.preons.col' class="table_center">
                     <div v-for='r in UPGRADE.preons.row'>
@@ -75,26 +78,30 @@
                         <br><span v-if='UPGRADE.preons[c*10+r].cur'>Currently: {{ UPGRADE.preons[c*10+r].curDesc(UPGRADE.preons[c*10+r].cur()) }}</span></button>
                     </div>
                 </div>
-            </div><div id="Atoms" style="display: none;">
+            </div><div v-if='player.tab == 5'>
                 <button class="atoms" onclick="atomize()">Reset ALL prevoius progress to gain<br>{{ notate(FORMULA.atoms_gain()) }} Atoms</button><br><br>
                 You have <h2>{{ notate(player.atoms.points) }}</h2> Atoms<br><br>
                 You atomized {{ notate(player.atoms.stats,0) }} times
                 <br><br>
                 <div class="table_center">
                     <div v-for='s in STABS'>
-                        <button class="tabbox atoms" v-on:click='changeSTab(s)'>{{ s }}</button>
+                        <button class="tabbox atoms" v-on:click='player.stab = STABS.indexOf(s)'>{{ s }}</button>
                     </div>
-                </div><br><div id="Atom-Merges">
+                </div><br><div v-if='player.stab == 0'>
                     <button class="atoms" onclick="addAtomMerge()">Buy new Atom-Merger for 1 Atoms</button><br><br>
                     <div style="border: solid 3px red; border-radius: 25px; padding: 10px;">
                         <button onclick="atom_mergeALL()">MERGE</button>
                         ({{ FORMULA.atom_merges_have(player.atom_merges) }} / 20) Atom-Merger<br><br>
                         <div v-bind:class="{mergebox: true, atombox: true, [merge[1]]: true}" v-for='merge in player.atom_merges' v-if='merge[0] > 0'>
-                            <br><br><h2 style="font-size: 35px;">[{{ merge[0] }}]</h2>
-                            <br><br>+{{ notate(FORMULA.atom_merge_effect(merge[0]),0) }}
+                            <br><br><h2 style="font-size: 25px;">[{{ merge[0] }}]</h2>
+                            <br><br><br>+{{ notate(FORMULA.atom_merge_effect(merge[0]),0) }}
+                        </div>
+                    </div><br><div class="table_center">
+                        <div v-for='upg in UPGRADE.atom_merges'>
+                            <button class="upg atoms" v-on:click='upg.buy()' v-bind:class='{closed: player.atoms.points.lt(upg.cost())}'>{{ upg.desc }} [{{ upg.level() }}]<br>Cost: {{ notate(upg.cost()) }}<br><span v-if='upg.cur'>Effect: {{ upg.curDesc(upg.cur()) }}</span></button>
                         </div>
                     </div>
-                </div><div id="Atom Dusts" style="display: none;">
+                </div><div v-if='player.stab == 1'>
                     <div v-for='c in ATOMS.dusts.col' class="table_center">
                         <div v-for='r in ATOMS.dusts.row' class="atom_dusts" v-bind:class="{[ATOMCOLORS[4*c+r-5]]: true}">
                             You have<br><h2>{{ notate(player.atoms.dusts[ATOMCOLORS[4*c+r-5]]) }}</h2>
@@ -104,17 +111,20 @@
                             <br><br>Currently: {{ ATOMS.cur[4*c+r-5][0][1](ATOMS.cur[4*c+r-5][0][0]()) }}<span v-if='ATOMS.cur[4*c+r-5][1]'>, {{ ATOMS.cur[4*c+r-5][1][1](ATOMS.cur[4*c+r-5][1][0]()) }}</span>
                         </div>
                     </div>
-                </div><div id="Atom Milestones" style="display: none;">
+                </div><div v-if='player.stab == 2'>
                     <div v-for='c in ATOMS.milestones.col' class="table_center">
                         <div v-for='r in ATOMS.milestones.row' style="margin: 3px;">
                             {{ notate(ATOMS.milestones[c*10+r].req,0) }} Atomizes
                             <div class="milestones" v-bind:class="{reached: player.atoms.stats.gte(ATOMS.milestones[c*10+r].req)}">
                                 {{ ATOMS.milestones[c*10+r].desc }}
+                            </div><div v-if='c*10+r == 22 && player.atoms.stats.gte(ATOMS.milestones[c*10+r].req)'>
+                                <input placeholder="Input Number" v-model="player.autobuys.atoms[1]">
+                                <input type="checkbox" v-model="player.autobuys.atoms[0]">
                             </div>
                         </div>
                     </div>
                 </div>
-            </div><div id='Challenges' style="display: none;">
+            </div><div v-if='player.tab == 6'>
                 <div v-for='c in CHALLENGES.col' class="table_center">
                     <div v-for='r in CHALLENGES.row' class="challenge" v-if='CHALLENGES[c*10+r].unl()' v-bind:class='{bought: player.chalCompleted.includes(c*10+r)}'>
                         <h2>{{ CHALLENGES[c*10+r].title }}</h2>
@@ -125,11 +135,11 @@
                         <br><span v-if='CHALLENGES[c*10+r].cur'>Currently: {{ CHALLENGES[c*10+r].curDesc(CHALLENGES[c*10+r].cur()) }}</span>
                     </div>
                 </div>
-            </div><div id="Achievements" style="display: none;">
+            </div><div v-if='player.tab == 7'>
                 <div class="table_center">
                     <div v-for='t in ACHIEVEMENTS.effs'><button class="achi">[{{ t.best() }}] - {{ t.desc }}<br>Currently: {{ t.curDesc(t.cur()) }}</button></div>
                 </div>
-            </div><div id="Options" style="display: none;">
+            </div><div v-if='player.tab == 8'>
                 <button onclick="save()">Save</button>
                 <button onclick="if (confirm('You wanted to RESET your progress to new game?')) {wipe(); location.reload()}">WIPE</button>
                 <button onclick="exporty()">Export</button>

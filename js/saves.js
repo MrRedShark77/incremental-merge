@@ -15,8 +15,7 @@ function calc(dt) {
         addMerge()
         if (player.prestige.upgs.includes(12)) mergeAll()
         if (player.energy.upgs.includes(12)) {
-            UPGRADE.merges[0].buy()
-            UPGRADE.merges[1].buy()
+            for (let i = 0; i < 2; i++) if (player.autobuys.merges[i]) UPGRADE.merges[i].buy()
         }
         ticks = 0
     }
@@ -43,6 +42,10 @@ function calc(dt) {
         player.merges.push(0)
     }
     if (!player.unlocks.includes('sacrifice') & player.prestige.upgs.includes(23)) player.unlocks.push('sacrifice')
+    if (player.atoms.stats.gte(ATOMS.milestones[22].req) & player.autobuys.atoms[0]) {
+        let max = E(player.autobuys.atoms[1]).isNaN()?E(Infinity):E(player.autobuys.atoms[1])
+        if (FORMULA.atoms_gain().gte(max)) atomize()
+    }
 }
 
 function wipe() {
@@ -87,7 +90,14 @@ function wipe() {
         minMergeLevel: 1,
         bestMergeLevel: 1,
         ticks: 0,
+        tab: 0,
+        stab: 0,
+        minAtomMergeLevel: 1,
         achievements: [],
+        autobuys: {
+            merges: [true, true],
+            atoms: [false, E(2)],
+        },
     }
     for (let i = 0; i < 8; i++) player.atoms.dusts[ATOMCOLORS[i]] = E(0)
     for (let i = 0; i < 20; i++) player.atom_merges.push([0, ATOMCOLORS[Math.floor(Math.random() * 8)]])
@@ -168,6 +178,13 @@ function loadPlayer(load) {
         for (let i = 0; i < 8; i++) player.atoms.dusts[ATOMCOLORS[i]] = ex(load.atoms.dusts[ATOMCOLORS[i]])
     }
     if (load.atom_merges != undefined) player.atom_merges = load.atom_merges
+    if (load.minAtomMergeLevel != undefined) player.minAtomMergeLevel = load.minAtomMergeLevel
+    if (load.autobuys != undefined) {
+        player.autobuys = {
+            merges: load.autobuys.merges,
+            atoms: [load.autobuys.atoms[0], ex(load.autobuys.atoms[1])],
+        }
+    }
 }
 
 function loadGame() {

@@ -45,7 +45,10 @@ const FORMULA = {
         for (let i = 0; i < arr.length; i++) if (arr[i][0]>0) merge++
         return merge
     },
-    prestige_effect: () => { return player.prestige.stats.div(100).add(1).pow(player.energy.upgs.includes(21)?1.15:1) },
+    prestige_effect: () => { return player.prestige.stats.div(100).add(1)
+        .pow(player.energy.upgs.includes(21)?1.15:1)
+        .pow(player.prestige.upgs.includes(34)?UPGRADE.prestige[34].cur():1)
+    },
     prestige_gain: () => { return player.number.add(1).logBase(player.energy.upgs.includes(32)?50:100).pow(3)
         .mul(player.prestige.upgs.includes(11)?UPGRADE.prestige[11].cur():1)
         .mul(FORMULA.particles_eff.n_effect())
@@ -64,7 +67,10 @@ const FORMULA = {
         .pow(player.energy.upgs.includes(31)?1.25:1)
         .pow(player.chal.includes(22)?0.5:1)
     },
-    energy_effect: () => { return player.energy.stats.add(1).pow(player.prestige.upgs.includes(31)?0.95:0.75) },
+    energy_effect: () => { return player.energy.stats.add(1)
+        .pow(player.prestige.upgs.includes(31)?0.95:0.75)
+        .pow(player.energy.upgs.includes(33)?UPGRADE.energy[33].cur():1)
+    },
     sacr_gain: () => { return player.prestige.stats.add(1).log10().mul(player.energy.stats.add(1).log10().pow(1.5))
         .mul(player.sacrifice.upgs.includes(21)?UPGRADE.sacrifice[21].cur():1)
         .mul(player.sacrifice.upgs.includes(22)?UPGRADE.sacrifice[22].cur():1)
@@ -136,6 +142,7 @@ const TABS_UNL = {
 const UPGRADE = {
     merges: {
         0: {
+            autobuy: 0,
             desc: 'Mergers spawn 1 Tier higher.',
             level: () => { return player.minMergeLevel },
             cost: () => { return E(3+(player.minMergeLevel-1)/(25
@@ -152,6 +159,7 @@ const UPGRADE = {
             },
         },
         1: {
+            autobuy: 1,
             desc: 'Mergers spawn faster.',
             level: () => { return player.ticks },
             cost: () => { return E(5).pow(player.ticks).mul(1000) },
@@ -231,9 +239,11 @@ const UPGRADE = {
             curDesc: (x) => { return notate(x.sub(1).mul(100),0)+'%' },
         },
         34: {
-            desc: 'Placeholder.',
+            desc: 'Prestige stats boost Prestige effect.',
             unl: () => { return player.prestige.upgs.includes(33) & player.atoms.stats.gte(ATOMS.milestones[11].req) },
-            cost: () => { return E(1/0) },
+            cost: () => { return E(1e21) },
+            cur: () => { return E(player.prestige.stats).add(1).log10().add(1).pow(1/15) },
+            curDesc: (x) => { return '^'+notate(x) },
         },
     },
     energy: {
@@ -286,9 +296,11 @@ const UPGRADE = {
             cost: () => { return E(1e12) },
         },
         33: {
-            desc: 'Placeholder.',
+            desc: 'Energy stats boost Energy effect.',
             unl: () => { return player.energy.upgs.includes(23) & player.atoms.stats.gte(ATOMS.milestones[11].req) },
-            cost: () => { return E(1/0) },
+            cost: () => { return E(1e17) },
+            cur: () => { return E(player.energy.stats).add(1).log10().add(1).pow(1/15) },
+            curDesc: (x) => { return '^'+notate(x) },
         },
     },
     sacrifice: {
@@ -446,6 +458,21 @@ const UPGRADE = {
             cost: () => { return E(1e11) },
         },
     },
+    atom_merges: {
+        0: {
+            desc: 'Atom-Mergers spawn 1 Tier higher.',
+            level: () => { return player.minAtomMergeLevel },
+            cost: () => { return E(2+(player.minAtomMergeLevel-1)/25).pow(player.minAtomMergeLevel) },
+            buy: () => {
+                let cost = UPGRADE.atom_merges[0].cost()
+                if (player.atoms.points.gte(cost)) {
+                    player.atoms.points = player.atoms.points.sub(cost)
+                    player.minAtomMergeLevel++
+                    for (let i = 0; i < player.atom_merges.length; i++) if (player.atom_merges[i][0]<player.minAtomMergeLevel & player.atom_merges[i][0]!=0) player.atom_merges[i][0] = player.minAtomMergeLevel
+                }
+            },
+        }
+    },
 }
 
 const CHALLENGES = {
@@ -576,7 +603,7 @@ function resetSacrifice() {
 
 function atomize() {
     if (FORMULA.atoms_gain().gte(1)) {
-        if (confirm('Are you really atomize? Reset all previous progress to gain Atoms! Ready?')) {
+        if (player.atoms.stats.gte(ATOMS.milestones[22].req)?true:confirm('Are you really atomize? Reset all previous progress to gain Atoms! Ready?')) {
             player.atoms.points = player.atoms.points.add(FORMULA.atoms_gain())
             player.atoms.stats = player.atoms.stats.add(1)
             player.unlocks = ['atoms', 'challenges']
@@ -596,7 +623,7 @@ function atomize() {
             player.sacrifice = {
                 points: E(0),
                 stats: E(0),
-                upgs: [],
+                upgs: player.atoms.stats.gte(ATOMS.milestones[23].req)?player.sacrifice.upgs:[],
                 particles: {
                     p: E(0),
                     n: E(0),
@@ -606,22 +633,18 @@ function atomize() {
             player.preons = {
                 points: E(0),
                 stats: E(0),
-                upgs: [],
+                upgs: player.atoms.stats.gte(ATOMS.milestones[31].req)?player.preons.upgs:[],
             }
         }
     }
 }
 
 function changeTab(curTab) {
-    document.getElementById(tab).style.display = 'none'
-    tab = curTab
-    document.getElementById(tab).style.display = ''
+    player.tab = curTab
 }
 
 function changeSTab(curTab) {
-    document.getElementById(stab).style.display = 'none'
-    stab = curTab
-    document.getElementById(stab).style.display = ''
+    player.stab = curTab
 }
 
 function addMerge() {
@@ -637,7 +660,7 @@ function addAtomMerge() {
     if (player.atoms.points.gte(1) && FORMULA.atom_merges_have(player.atom_merges) < 20) {
         player.atoms.points = player.atoms.points.sub(1)
         for (let i = 0; i < player.atom_merges.length; i++) if (player.atom_merges[i][0] == 0) {
-            player.atom_merges[i][0] = 1
+            player.atom_merges[i][0] = player.minAtomMergeLevel
             player.atom_merges[i][1] = ATOMCOLORS[Math.floor(Math.random() * 8)]
             break
         }
