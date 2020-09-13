@@ -615,7 +615,7 @@ function atomize() {
             player.prestige.stats = E(0)
             if (!player.atoms.stats.gte(ATOMS.milestones[21].req)) player.prestige.upgs = []
             player.energy.points = E(0)
-            player.energy.stats = E(0)
+            player.energy.stats = player.atoms.stats.gte(ATOMS.milestones[32].req)?E(100):E(0)
             if (!player.atoms.stats.gte(ATOMS.milestones[21].req)) player.energy.upgs = []
             player.merges = [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
             player.minMergeLevel = 1

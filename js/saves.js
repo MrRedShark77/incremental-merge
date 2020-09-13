@@ -182,7 +182,7 @@ function loadPlayer(load) {
     if (load.autobuys != undefined) {
         player.autobuys = {
             merges: load.autobuys.merges,
-            atoms: [load.autobuys.atoms[0], ex(load.autobuys.atoms[1])],
+            atoms: [false, E(2)],
         }
     }
 }

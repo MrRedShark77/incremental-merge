@@ -25,9 +25,9 @@ const ATOMS = {
         'Black'
     ],
     desc: [
-        'gives more Number.',
+        'gives more Numbers.',
         'gives more Prestige points.',
-        'gives more Energy, and boosts Energy chance gain.',
+        'gives more Energy, and boosts Energy chances to gain.',
         'gives more Sacrifice points.',
         "gives more Preons, and boosts it's effect.",
         'gives more Merge space. (max 30)',
@@ -76,12 +76,12 @@ const ATOMS = {
             req: E(36),
         },
         32: {
-            desc: 'Placeholder.',
-            req: E(1/0),
+            desc: 'Start with Energy unlocked (100 Energy stats).',
+            req: E(100),
         },
         33: {
             desc: 'Placeholder.',
-            req: E(1/0),
+            req: E(Infinity),
         },
     },
 }
