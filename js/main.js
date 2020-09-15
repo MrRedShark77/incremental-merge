@@ -538,9 +538,9 @@ const ACHIEVEMENTS = {
     },
     effs: {
         0: {
-            desc: 'Highest Merge level, every 10 will merge effects has added 2.5% stronger.',
+            desc: 'Highest Merge level, every 10 will merge effects has added 2.5% stronger (capped at 100%).',
             best: () => { return player.bestMergeLevel },
-            cur: () => { return Math.floor(player.bestMergeLevel/10)*0.025 },
+            cur: () => { return Math.min(Math.floor(player.bestMergeLevel/10)*0.025, 1) },
             curDesc: (x) => { return notate(x*100,1) + '%' }, 
         },
     },
