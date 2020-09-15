@@ -45,7 +45,7 @@ const ATOMS = {
         [[() => { return player.atoms.dusts.bla.add(1).logBase(3).min(75) }, (x) => { return notate(x)+'%' }], false],
     ],
     milestones: {
-        col: 3,
+        col: 4,
         row: 3,
         11: {
             desc: 'Unlock 3 new Sacrifice upgrades.',
@@ -82,6 +82,18 @@ const ATOMS = {
         33: {
             desc: 'Unlock Nucelar.',
             req: E(1e3),
+        },
+        41: {
+            desc: 'Unlock Auto Atom-Merge (buy new Auto-Merger & Auto-Merge).',
+            req: E(1e4),
+        },
+        42: {
+            desc: 'Placeholder.',
+            req: E(1/0),
+        },
+        43: {
+            desc: 'Placeholder.',
+            req: E(1/0),
         },
     },
 }

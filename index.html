@@ -89,9 +89,11 @@
                         <button class="tabbox atoms" v-on:click='player.stab = STABS.indexOf(s)' v-if="STABS_UNL[s]()">{{ s }}</button>
                     </div>
                 </div><br><div v-if='player.stab == 0'>
-                    <button class="atoms" onclick="addAtomMerge()">Buy new Atom-Merger for 1 Atoms</button><br><br>
+                    <button class="atoms" onclick="addAtomMerge()">Buy new Atom-Merger for 1 Atoms</button>
+                    <input type="checkbox" v-model="player.autobuys.atom_merges[0]" v-if="player.atoms.stats.gte(ATOMS.milestones[41].req)"><br><br>
                     <div style="border: solid 3px red; border-radius: 25px; padding: 10px;">
                         <button onclick="atom_mergeALL()">MERGE</button>
+                        <input type="checkbox" v-model="player.autobuys.atom_merges[1]" v-if="player.atoms.stats.gte(ATOMS.milestones[41].req)">
                         ({{ FORMULA.atom_merges_have(player.atom_merges) }} / 20) Atom-Merger<br><br>
                         <div v-bind:class="{mergebox: true, atombox: true, [merge[1]]: true}" v-for='merge in player.atom_merges' v-if='merge[0] > 0'>
                             <br><br><h2 style="font-size: 25px;">[{{ merge[0] }}]</h2>

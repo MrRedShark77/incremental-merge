@@ -48,6 +48,10 @@ function calc(dt) {
     }
     player.atoms.points = player.atoms.points.add(player.nuclear.upgs.includes(14)?FORMULA.atoms_gain().mul(dt/1000):0)
     player.atoms.stats = player.atoms.stats.add(player.nuclear.upgs.includes(14)?FORMULA.atomizes_gain().mul(dt/1000):0)
+    if (player.atoms.stats.gte(ATOMS.milestones[41].req)) {
+        if (player.autobuys.atom_merges[0]) addAtomMerge()
+        if (player.autobuys.atom_merges[1]) atom_mergeALL()
+    }
 }
 
 function wipe() {
@@ -103,6 +107,7 @@ function wipe() {
         achievements: [],
         autobuys: {
             merges: [true, true],
+            atom_merges: [false, false],
             atoms: [false, E(2)],
         },
     }
@@ -189,6 +194,7 @@ function loadPlayer(load) {
     if (load.autobuys != undefined) {
         player.autobuys = {
             merges: load.autobuys.merges,
+            atom_merges: ((load.autobuys.atom_merges != undefined)?(load.autobuys.atom_merges):([false,false])),
             atoms: [false, E(2)],
         }
     }
