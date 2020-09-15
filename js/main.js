@@ -16,11 +16,15 @@ const FORMULA = {
         .mul(FORMULA.energy_effect())
         .mul(player.chalCompleted.includes(21)?CHALLENGES[21].cur():1)
         .mul(player.atoms.stats.gte(1)?ATOMS.cur[0][0][0]():1)
+        .mul(player.preons.upgs.includes(35)?UPGRADE.preons[35].cur():1)
         .pow(player.prestige.upgs.includes(21)?1.15:1)
         .pow(player.chal.includes(22)?0.5:1)
         .div(player.chal.includes(21)?(player.number.add(1).cbrt()):1)
         :0 },
-    atom_merge_effect: (x) => { return (x > 0)?E(5).pow(x-1):0 },
+    atom_merge_effect: (x) => { return (x > 0)?E(5).pow(x-1)
+        .mul(FORMULA.nuclear_effect())
+        .mul(player.nuclear.upgs.includes(11)?UPGRADE.nuclear[11].cur():1)
+        :0 },
     dt_merges: () => {
         let sum = E(0)
         for (let i = 0; i < player.merges.length; i++) sum = sum.add(FORMULA.merge_effect(player.merges[i]))
@@ -55,6 +59,7 @@ const FORMULA = {
         .mul(player.chalCompleted.includes(11)?CHALLENGES[11].cur():1)
         .mul(player.chal.includes(11)?0:1)
         .mul(player.atoms.stats.gte(1)?ATOMS.cur[1][0][0]():1)
+        .mul(player.preons.upgs.includes(35)?UPGRADE.preons[35].cur():1)
         .pow(player.prestige.upgs.includes(14)?1.25:1)
         .pow(player.chal.includes(22)?0.5:1)
     },
@@ -64,6 +69,7 @@ const FORMULA = {
         .mul(player.chal.includes(12)?0:1)
         .mul(player.atoms.stats.gte(1)?ATOMS.cur[2][0][0]():1)
         .mul(player.chalCompleted.includes(12)?CHALLENGES[12].cur():1)
+        .mul(player.preons.upgs.includes(35)?UPGRADE.preons[35].cur():1)
         .pow(player.energy.upgs.includes(31)?1.25:1)
         .pow(player.chal.includes(22)?0.5:1)
     },
@@ -97,6 +103,7 @@ const FORMULA = {
         .mul(player.preons.upgs.includes(12)?UPGRADE.preons[12].cur():1)
         .mul(player.preons.upgs.includes(13)?UPGRADE.preons[13].cur():1)
         .mul(player.preons.upgs.includes(33)?UPGRADE.preons[33].cur():1)
+        .mul(player.preons.upgs.includes(15)?UPGRADE.preons[15].cur():1)
         .mul(player.atoms.stats.gte(1)?ATOMS.cur[4][0][0]():1)
         .mul(player.chalCompleted.includes(22)?CHALLENGES[22].cur():1)
     :E(0)},
@@ -106,7 +113,15 @@ const FORMULA = {
         .mul(player.preons.upgs.includes(23)?UPGRADE.preons[23].cur():1)
         .pow(player.atoms.stats.gte(1)?ATOMS.cur[4][1][0]():1)
     },
-    atoms_gain: () => { return player.sacrifice.particles.p.add(1).mul(player.sacrifice.particles.n.add(1)).mul(player.sacrifice.particles.e.add(1)).log10().div(50) },
+    atoms_gain: () => { return player.sacrifice.particles.p.add(1).mul(player.sacrifice.particles.n.add(1)).mul(player.sacrifice.particles.e.add(1)).log10().div(50)
+        .mul(FORMULA.nuclear_effect())
+    },
+    atomizes_gain: () => { return FORMULA.atoms_gain().div(2) },
+    nuclear_gain: () => { return E(1)
+        .mul(player.nuclear.upgs.includes(13)?UPGRADE.nuclear[13].cur():1)
+        .mul(player.preons.upgs.includes(25)?UPGRADE.preons[25].cur():1)
+    },
+    nuclear_effect: () => { return player.nuclear.stats.add(1).logBase(2).add(1) },
 }
 
 const TABS = [
@@ -125,6 +140,7 @@ const STABS = [
     'Atom-Merges',
     "Atom Dusts",
     "Atom Milestones",
+    "Nucelar",
 ]
 
 const TABS_UNL = {
@@ -137,6 +153,13 @@ const TABS_UNL = {
     'Challenges': () => { return player.unlocks.includes('challenges') },
     'Preons': () => { return player.sacrifice.upgs.includes(23) },
     'Atoms': () => { return player.unlocks.includes('atoms') },
+}
+
+const STABS_UNL = {
+    'Atom-Merges': () => { return true },
+    "Atom Dusts": () => { return true },
+    "Atom Milestones": () => { return true },
+    "Nucelar": () => { return player.atoms.stats.gte(ATOMS.milestones[33].req) },
 }
 
 const UPGRADE = {
@@ -381,7 +404,7 @@ const UPGRADE = {
         },
     },
     preons: {
-        row: 4,
+        row: 5,
         col: 3,
         11: {
             desc: 'Multiply Preon production based on Energy Stat.',
@@ -457,6 +480,27 @@ const UPGRADE = {
             unl: () => { return player.preons.upgs.includes(24) & !player.unlocks.includes('atoms') },
             cost: () => { return E(1e11) },
         },
+        15: {
+            desc: 'Nuclear Powers boost Preons gain.',
+            unl: () => { return player.preons.upgs.includes(33) & player.nuclear.upgs.includes(15) },
+            cost: () => { return E(1e25) },
+            cur: () => { return player.nuclear.stats.add(1).pow(2) },
+            curDesc: (x) => { return notate(x)+'x' },
+        },
+        25: {
+            desc: 'Preons boost Nuclear Powers gain.',
+            unl: () => { return player.preons.upgs.includes(33) & player.nuclear.upgs.includes(15) },
+            cost: () => { return E(1e30) },
+            cur: () => { return player.preons.stats.add(1).log10().add(1).log10().add(1) },
+            curDesc: (x) => { return notate(x)+'x' },
+        },
+        35: {
+            desc: 'Preons boost all Pre-Sacrifice productions.',
+            unl: () => { return player.preons.upgs.includes(33) & player.nuclear.upgs.includes(15) },
+            cost: () => { return E(1e32) },
+            cur: () => { return player.preons.stats.add(1).pow(1/8) },
+            curDesc: (x) => { return notate(x)+'x' },
+        },
     },
     atom_merges: {
         0: {
@@ -472,6 +516,41 @@ const UPGRADE = {
                 }
             },
         }
+    },
+    nuclear: {
+        row: 5,
+        col: 1,
+        11: {
+            desc: 'Atoms boost Atom Dusts.',
+            unl: () => { return true },
+            cost: () => { return E(5) },
+            cur: () => { return player.atoms.points.add(1).log10().add(1) },
+            curDesc: (x) => { return notate(x)+'x' },
+        },
+        12: {
+            desc: 'Nuclear Power Chance is multiplied based on number of times atomized.',
+            unl: () => { return true },
+            cost: () => { return E(10) },
+            cur: () => { return player.atoms.stats.add(1).log10().add(1) },
+            curDesc: (x) => { return notate(x)+'x' },
+        },
+        13: {
+            desc: 'Atoms boost Nuclear Power gain.',
+            unl: () => { return true },
+            cost: () => { return E(25) },
+            cur: () => { return player.atoms.points.add(1).log10().add(1) },
+            curDesc: (x) => { return notate(x)+'x' },
+        },
+        14: {
+            desc: 'Gain 100% Atoms, and Atomizes based on Atoms.',
+            unl: () => { return true },
+            cost: () => { return E(50) },
+        },
+        15: {
+            desc: 'Unlock 3 more preon upgrades.',
+            unl: () => { return true },
+            cost: () => { return E(100) },
+        },
     },
 }
 
@@ -702,6 +781,14 @@ function atom_mergeALL() {
                         player.atom_merges[j][0]=0
                         player.atom_merges[k][0]=0
                         merged = true
+
+                        let chance = E(Math.random() * 101).lt(E(1).mul(player.nuclear.upgs.includes(12)?UPGRADE.nuclear[12].cur():1))
+                        if (chance & player.atoms.stats.gte(ATOMS.milestones[33].req)) {
+                            let gain = FORMULA.nuclear_gain()
+                            player.nuclear.points = player.nuclear.points.add(gain)
+                            player.nuclear.stats = player.nuclear.stats.add(gain)
+                        }
+
                         break
                     }
                 }

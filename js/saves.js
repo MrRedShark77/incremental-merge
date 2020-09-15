@@ -46,6 +46,8 @@ function calc(dt) {
         let max = E(player.autobuys.atoms[1]).isNaN()?E(Infinity):E(player.autobuys.atoms[1])
         if (FORMULA.atoms_gain().gte(max)) atomize()
     }
+    player.atoms.points = player.atoms.points.add(player.nuclear.upgs.includes(14)?FORMULA.atoms_gain().mul(dt/1000):0)
+    player.atoms.stats = player.atoms.stats.add(player.nuclear.upgs.includes(14)?FORMULA.atomizes_gain().mul(dt/1000):0)
 }
 
 function wipe() {
@@ -80,6 +82,11 @@ function wipe() {
             points: E(0),
             stats: E(0),
             dusts: {},
+            upgs: [],
+        },
+        nuclear: {
+            points: E(0),
+            stats: E(0),
             upgs: [],
         },
         chal: [],
@@ -184,6 +191,11 @@ function loadPlayer(load) {
             merges: load.autobuys.merges,
             atoms: [false, E(2)],
         }
+    }
+    if (load.nuclear != undefined) player.nuclear = {
+        points: ex(load.nuclear.points),
+        stats: ex(load.nuclear.stats),
+        upgs: load.nuclear.upgs,
     }
 }
 

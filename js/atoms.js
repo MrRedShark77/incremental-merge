@@ -35,7 +35,7 @@ const ATOMS = {
         'gives a chance that when merging, the result spawns 1 tier higher 1+1 = 3.',
     ],
     cur: [
-        [[() => { return player.atoms.dusts.red.add(1).pow(1.1) }, (x) => { return 'x'+notate(x) }], false],
+        [[() => { return player.atoms.dusts.red.add(1).pow(1.25) }, (x) => { return 'x'+notate(x) }], false],
         [[() => { return player.atoms.dusts.ora.add(1).pow(0.6) }, (x) => { return 'x'+notate(x) }], false],
         [[() => { return player.atoms.dusts.yel.add(1).pow(0.75) }, (x) => { return 'x'+notate(x)+' Energy' }], [() => { return player.atoms.dusts.yel.add(1).logBase(3).pow(1.5).min(50) }, (x) => { return notate(x)+'% chance' }]],
         [[() => { return player.atoms.dusts.gre.add(1).pow(0.45) }, (x) => { return 'x'+notate(x) }], false],
@@ -80,8 +80,8 @@ const ATOMS = {
             req: E(100),
         },
         33: {
-            desc: 'Placeholder.',
-            req: E(Infinity),
+            desc: 'Unlock Nucelar.',
+            req: E(1e3),
         },
     },
 }

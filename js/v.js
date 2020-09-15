@@ -15,6 +15,7 @@ function loadVue() {
             startChal,
             chalText,
             TABS_UNL,
+            STABS_UNL,
             FORMULA,
             UPGRADE,
             TABS,

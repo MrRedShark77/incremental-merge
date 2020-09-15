@@ -82,11 +82,11 @@
             </div><div v-if='player.tab == 5'>
                 <button class="atoms" onclick="atomize()">Reset ALL prevoius progress to gain<br>{{ notate(FORMULA.atoms_gain()) }} Atoms</button><br><br>
                 You have <h2>{{ notate(player.atoms.points) }}</h2> Atoms<br><br>
-                You atomized {{ notate(player.atoms.stats,0) }} times
+                You atomized {{ notate(player.atoms.stats,0) }}<span v-if="player.nuclear.upgs.includes(14)"> (+{{ notate(FORMULA.atomizes_gain(),0) }}/s)</span> times
                 <br><br>
                 <div class="table_center">
                     <div v-for='s in STABS'>
-                        <button class="tabbox atoms" v-on:click='player.stab = STABS.indexOf(s)'>{{ s }}</button>
+                        <button class="tabbox atoms" v-on:click='player.stab = STABS.indexOf(s)' v-if="STABS_UNL[s]()">{{ s }}</button>
                     </div>
                 </div><br><div v-if='player.stab == 0'>
                     <button class="atoms" onclick="addAtomMerge()">Buy new Atom-Merger for 1 Atoms</button><br><br>
@@ -122,6 +122,17 @@
                                 <input placeholder="Input Number" v-model="player.autobuys.atoms[1]">
                                 <input type="checkbox" v-model="player.autobuys.atoms[0]">
                             </div>
+                        </div>
+                    </div>
+                </div><div v-if='player.stab == 3'>
+                    Note: Have atom-merge chance to get Nucelar Power.<br><br>
+                    You have <h2>{{ notate(player.nuclear.points) }} [{{ notate(player.nuclear.stats) }}]</h2> Nucelar Power, which multiples Atoms & Atom Dusts by {{ notate(FORMULA.nuclear_effect()) }}
+                    <br><br><div v-for='c in UPGRADE.nuclear.col' class="table_center">
+                        <div v-for='r in UPGRADE.nuclear.row'>
+                            <button class="upg prestige" v-on:click='buyUPG("nuclear",c*10+r)' v-if='UPGRADE.nuclear[c*10+r].unl()' 
+                            v-bind:class='{closed: player.nuclear.points.lt(UPGRADE.nuclear[c*10+r].cost()) & !player.nuclear.upgs.includes(c*10+r), bought: player.nuclear.upgs.includes(c*10+r)}'>
+                            {{ UPGRADE.nuclear[c*10+r].desc }}<br>Cost: {{ notate(UPGRADE.nuclear[c*10+r].cost(),0) }}
+                            <br><span v-if='UPGRADE.nuclear[c*10+r].cur'>Currently: {{ UPGRADE.nuclear[c*10+r].curDesc(UPGRADE.nuclear[c*10+r].cur()) }}</span></button>
                         </div>
                     </div>
                 </div>
