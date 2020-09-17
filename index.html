@@ -80,7 +80,7 @@
                     </div>
                 </div>
             </div><div v-if='player.tab == 5'>
-                <button class="atoms" onclick="atomize()">Reset ALL prevoius progress to gain<br>{{ notate(FORMULA.atoms_gain()) }} Atoms</button><br><br>
+                <button class="atoms" onclick="atomize()">Reset ALL previous progress to gain<br>{{ notate(FORMULA.atoms_gain()) }} Atoms</button><br><br>
                 You have <h2>{{ notate(player.atoms.points) }}</h2> Atoms<br><br>
                 You atomized {{ notate(player.atoms.stats,0) }}<span v-if="player.nuclear.upgs.includes(14)"> (+{{ notate(FORMULA.atomizes_gain(),0) }}/s)</span> times
                 <br><br>
