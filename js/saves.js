@@ -93,6 +93,10 @@ function wipe() {
             stats: E(0),
             upgs: [],
         },
+        uranium: {
+            points: E(0),
+            active: false,
+        },
         chal: [],
         chalCompleted: [],
         unlocks: [],
@@ -202,6 +206,10 @@ function loadPlayer(load) {
         points: ex(load.nuclear.points),
         stats: ex(load.nuclear.stats),
         upgs: load.nuclear.upgs,
+    }
+    if (load.uranium != undefined) player.uranium = {
+        points: ex(load.uranium.points),
+        active: load.uranium.active,
     }
 }
 

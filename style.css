@@ -252,6 +252,12 @@ h1, h2 {
     border-color: green;
 }
 
+.uranium {
+    background-color: darkgreen;
+    border-radius: 20px;
+    padding: 10px;
+}
+
 [tooltip] {
 	position: relative;
 	z-index: 2;

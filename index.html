@@ -94,7 +94,8 @@
                     <div style="border: solid 3px red; border-radius: 25px; padding: 10px;">
                         <button onclick="atom_mergeALL()">MERGE</button>
                         <input type="checkbox" v-model="player.autobuys.atom_merges[1]" v-if="player.atoms.stats.gte(ATOMS.milestones[41].req)">
-                        ({{ FORMULA.atom_merges_have(player.atom_merges) }} / 20) Atom-Merger<br><br>
+                        ({{ FORMULA.atom_merges_have(player.atom_merges) }} / 20) Atom-Merger<br>
+                        <button onclick="recycleAtoms()">Recycle all Atom-Mergers for {{ notate(FORMULA.recycle_atoms(),0) }} Atoms</button><br><br>
                         <div v-bind:class="{mergebox: true, atombox: true, [merge[1]]: true}" v-for='merge in player.atom_merges' v-if='merge[0] > 0'>
                             <br><br><h2 style="font-size: 25px;">[{{ merge[0] }}]</h2>
                             <br><br><br>+{{ notate(FORMULA.atom_merge_effect(merge[0]),0) }}
@@ -128,7 +129,7 @@
                     </div>
                 </div><div v-if='player.stab == 3'>
                     Note: Have atom-merge chance to get Nucelar Power.<br><br>
-                    You have <h2>{{ notate(player.nuclear.points) }} [{{ notate(player.nuclear.stats) }}]</h2> Nucelar Power, which multiples Atoms & Atom Dusts by {{ notate(FORMULA.nuclear_effect()) }}
+                    You have <h2>{{ notate(player.nuclear.points,0) }} [{{ notate(player.nuclear.stats,0) }}]</h2> Nucelar Power, which multiples Atoms & Atom Dusts by {{ notate(FORMULA.nuclear_effect()) }}
                     <br><br><div v-for='c in UPGRADE.nuclear.col' class="table_center">
                         <div v-for='r in UPGRADE.nuclear.row'>
                             <button class="upg prestige" v-on:click='buyUPG("nuclear",c*10+r)' v-if='UPGRADE.nuclear[c*10+r].unl()' 
@@ -136,6 +137,9 @@
                             {{ UPGRADE.nuclear[c*10+r].desc }}<br>Cost: {{ notate(UPGRADE.nuclear[c*10+r].cost(),0) }}
                             <br><span v-if='UPGRADE.nuclear[c*10+r].cur'>Currently: {{ UPGRADE.nuclear[c*10+r].curDesc(UPGRADE.nuclear[c*10+r].cur()) }}</span></button>
                         </div>
+                    </div><br><div class="uranium" v-if="player.atoms.stats.gte(ATOMS.milestones[42].req)">
+                        <button onclick="startUranium()" tooltip="Starting a Uranium run performs an Atom reset, disables Preons features except upgrades. In addition, all pre-Atoms production gain is raised by 0.1.">{{ player.uranium.active?'Exit':'Start' }} Uranium run.<span v-if='player.uranium.active'> {{ FORMULA.uranium_msg() }}</span></button><br><br>
+                        You have <h2>{{ notate(player.uranium.points,0) }}</h2> Uranium Power, which raises Particles gain by {{ notate(FORMULA.uranium_effect()) }}
                     </div>
                 </div>
             </div><div v-if='player.tab == 6'>
