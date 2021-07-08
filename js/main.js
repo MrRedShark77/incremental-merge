@@ -3,8 +3,8 @@ var date = Date.now();
 
 var player;
 var ticks = 0;
-var tab = 'Merges'
-var stab = 'Atom-Merges'
+var tab = 'Mergers'
+var stab = 'Atom Mergers'
 var particles = ['p','n','e']
 var large_particles = ['Proton','Neutron','Electron']
 var chal = []
@@ -149,7 +149,7 @@ const FORMULA = {
 }
 
 const TABS = [
-    'Merges',
+    'Mergers',
     'Prestige',
     'Energy',
     'Sacrifice',
@@ -161,14 +161,14 @@ const TABS = [
 ]
 
 const STABS = [
-    'Atom-Merges',
-    "Atom Dusts",
+    "Atom Mergers",
+    "Atom Dust",
     "Atom Milestones",
-    "Nucelar",
+    "Nuclear",
 ]
 
 const TABS_UNL = {
-    'Merges': () => { return true },
+    'Mergers': () => { return true },
     'Prestige': () => { return true },
     'Energy': () => { return player.energy.stats.gte(1) },
     'Achievements': () => { return true },
@@ -180,10 +180,10 @@ const TABS_UNL = {
 }
 
 const STABS_UNL = {
-    'Atom-Merges': () => { return true },
-    "Atom Dusts": () => { return true },
+    'Atom Mergers': () => { return true },
+    "Atom Dust": () => { return true },
     "Atom Milestones": () => { return true },
-    "Nucelar": () => { return player.atoms.stats.gte(ATOMS.milestones[33].req) },
+    "Nuclear": () => { return player.atoms.stats.gte(ATOMS.milestones[33].req) },
 }
 
 const UPGRADE = {
@@ -225,7 +225,7 @@ const UPGRADE = {
         row: 5,
         col: 3,
         11: {
-            desc: 'Highest Merge Tier boost Prestige gain.',
+            desc: 'Highest Merger Tier boosts Prestige point gain.',
             unl: () => { return true },
             cost: () => { return E(250) },
             cur: () => { return E(player.bestMergeLevel).add(1).pow(player.energy.upgs.includes(22)?1/2:1/6)
@@ -234,24 +234,24 @@ const UPGRADE = {
             curDesc: (x) => { return notate(x)+'x' },
         },
         12: {
-            desc: 'Automatically Merge all mergers like interval "Add Merger".',
+            desc: 'Automatically merge all Mergers at the same rate as the spawning interval.',
             unl: () => { return player.prestige.upgs.includes(11) },
             cost: () => { return E(1000) },
         },
         13: {
-            desc: 'Energy stats makes interval for Merges faster.',
+            desc: 'Energy stats makes Mergers spawn faster.',
             unl: () => { return player.prestige.upgs.includes(12) & player.energy.stats.gte(1) },
             cost: () => { return E(5000) },
             cur: () => { return E(player.energy.stats).add(1).pow(1/5) },
             curDesc: (x) => { return notate(x)+'x' },
         },
         21: {
-            desc: 'Raise merges production by 1.15.',
+            desc: 'Raise number production by 1.15.',
             unl: () => { return player.prestige.upgs.includes(12) },
             cost: () => { return E(20000) },
         },
         22: {
-            desc: 'Gain 1% Prestige points/s.',
+            desc: 'Gain 1% of your current Prestige points per second.',
             unl: () => { return player.prestige.upgs.includes(21) },
             cost: () => { return E(50000) },
         },
@@ -266,7 +266,7 @@ const UPGRADE = {
             cost: () => { return E(1e6) },
         },
         32: {
-            desc: 'Merge upgrade 1 cost is 25% cheaper.',
+            desc: 'Merger upgrade 1 cost is 25% cheaper.',
             unl: () => { return player.sacrifice.upgs.includes(13) & player.prestige.upgs.includes(22) },
             cost: () => { return E(3e6) },
         },
@@ -276,12 +276,12 @@ const UPGRADE = {
             cost: () => { return E(6e6) },
         },
         14: {
-            desc: 'Raise Prestige gain by 1.25.',
+            desc: 'Raise Prestige point gain by 1.25.',
             unl: () => { return player.prestige.upgs.includes(33) & player.atoms.stats.gte(ATOMS.milestones[11].req) },
             cost: () => { return E(1e10) },
         },
         24: {
-            desc: 'Merge upgrade 1 cost is adds 5% cheaper every 100 lvl Merge upgrade 2.',
+            desc: 'Merger upgrade 1 cost is 5% cheaper for every 100 levels of Merger upgrade 2.',
             unl: () => { return player.prestige.upgs.includes(33) & player.atoms.stats.gte(ATOMS.milestones[11].req) },
             cost: () => { return E(1e15) },
             cur: () => { return E(player.ticks).div(100).floor().mul(0.05).add(1) },
@@ -309,7 +309,7 @@ const UPGRADE = {
             curDesc: (x) => { return 'x'+notate(x) },
         },
         35: {
-            desc: 'Prestige Stats boost Sacrifice gain.',
+            desc: 'Prestige Stats boost Sacrifice point gain.',
             unl: () => { return player.nuclear.upgs.includes(21) && player.prestige.upgs.includes(34) },
             cost: () => { return E(1e38) },
             cur: () => { return player.prestige.points.add(1).logBase(5).add(1) },
@@ -320,19 +320,19 @@ const UPGRADE = {
         row: 4,
         col: 3,
         11: {
-            desc: 'Highest Merge Tier boost chance to gain Energy.',
+            desc: 'Highest Merger Tier boosts chance to gain Energy points.',
             unl: () => { return true },
             cost: () => { return E(5) },
             cur: () => { return E(player.bestMergeLevel).add(1).pow(player.prestige.upgs.includes(33)?1/3:1/5).toNumber() },
             curDesc: (x) => { return notate(x)+'x' },
         },
         12: {
-            desc: 'Automatically buy Merge upgrades like interval "Add Merger".',
+            desc: 'Automatically buy Merger upgrades at the same rate as the spawning interval.',
             unl: () => { return player.energy.upgs.includes(11) },
             cost: () => { return E(25) },
         },
         13: {
-            desc: 'Prestige stats boost Energy points gain.',
+            desc: 'Prestige stats boost Energy point gain.',
             unl: () => { return player.energy.upgs.includes(12) & player.prestige.stats.gte(1) },
             cost: () => { return E(50) },
             cur: () => { return player.prestige.stats.add(1).log10().add(1).pow(0.75)
@@ -351,19 +351,19 @@ const UPGRADE = {
             cost: () => { return E(20000) },
         },
         23: {
-            desc: 'Energy Stats boost Energy gain.',
+            desc: 'Energy Stats boost Energy point gain.',
             unl: () => { return player.sacrifice.upgs.includes(12) & player.energy.upgs.includes(13) },
             cost: () => { return E(50000) },
             cur: () => { return player.energy.stats.add(1).log10().add(1).pow(0.5) },
             curDesc: (x) => { return notate(x)+'x' },
         },
         31: {
-            desc: 'Raise Energy gain by 1.25.',
+            desc: 'Raise Energy point gain by 1.25.',
             unl: () => { return player.energy.upgs.includes(23) & player.atoms.stats.gte(ATOMS.milestones[11].req) },
             cost: () => { return E(5e8) },
         },
         32: {
-            desc: 'Prestige gain formula is better.',
+            desc: 'Prestige point gain formula is better.',
             unl: () => { return player.energy.upgs.includes(23) & player.atoms.stats.gte(ATOMS.milestones[11].req) },
             cost: () => { return E(1e12) },
         },
@@ -407,7 +407,7 @@ const UPGRADE = {
             curDesc: (x) => { return notate(x)+'x' },
         },
         12: {
-            desc: 'Proton boost chance to Energy gain.',
+            desc: 'Protons boost chance to gain Energy points.',
             unl: () => { return player.sacrifice.upgs.includes(11) },
             cost: () => { return E(50) },
             cur: () => { return player.sacrifice.particles.p.add(1).log10().add(1).pow(0.75) },
@@ -419,36 +419,36 @@ const UPGRADE = {
             cost: () => { return E(100) },
         },
         21: {
-            desc: 'Energy Stats boost Sacrifice gain.',
+            desc: 'Energy Stats boost Sacrifice point gain.',
             unl: () => { return player.sacrifice.upgs.includes(13) },
             cost: () => { return E(250) },
             cur: () => { return player.energy.stats.add(1).log10().add(1) },
             curDesc: (x) => { return notate(x)+'x' },
         },
         22: {
-            desc: 'Prestige Stats boost Sacrifice gain.',
+            desc: 'Prestige stats boost Sacrifice point gain.',
             unl: () => { return player.sacrifice.upgs.includes(13) },
             cost: () => { return E(500) },
             cur: () => { return player.prestige.stats.add(1).log10().add(1) },
             curDesc: (x) => { return notate(x)+'x' },
         },
         23: {
-            desc: 'Unlock Preons, generate Preons.',
+            desc: 'Unlock and generate Preons.',
             unl: () => { return player.sacrifice.upgs.includes(13) },
             cost: () => { return E(5e3) },
         },
         31: {
-            desc: 'You keep all Prestige upgrades upon sacrificing.',
+            desc: 'Keep all Prestige upgrades upon sacrificing.',
             unl: () => { return player.sacrifice.upgs.includes(23) & player.preons.upgs.includes(21) & !player.atoms.stats.gte(ATOMS.milestones[21].req) },
             cost: () => { return E(1e6) },
         },
         32: {
-            desc: 'You keep all Energy upgrades upon sacrificing.',
+            desc: 'Keep all Energy upgrades upon sacrificing.',
             unl: () => { return player.sacrifice.upgs.includes(23) & player.preons.upgs.includes(21) & !player.atoms.stats.gte(ATOMS.milestones[21].req) },
             cost: () => { return E(1e7) },
         },
         33: {
-            desc: 'Protons, Neutrons & Electrons boost Sacrifice gain.',
+            desc: 'Protons, Neutrons, & Electrons boost Sacrifice point gain.',
             unl: () => { return player.sacrifice.upgs.includes(23) & player.preons.upgs.includes(21) },
             cost: () => { return E(1e8) },
             cur: () => { return player.sacrifice.particles.p.add(1).log10().add(1)
@@ -458,7 +458,7 @@ const UPGRADE = {
             curDesc: (x) => { return notate(x)+'x' },
         },
         14: {
-            desc: 'Raise Sacrifice gain by 1.15.',
+            desc: 'Raise Sacrifice point gain by 1.15.',
             unl: () => { return player.sacrifice.upgs.includes(33) & player.atoms.stats.gte(ATOMS.milestones[11].req) },
             cost: () => { return E(1e12) },
         },
@@ -480,14 +480,14 @@ const UPGRADE = {
             curDesc: (x) => { return 'x'+notate(x) },
         },
         25: {
-            desc: 'Nuclear Powers boost all Particle effects of gain.',
+            desc: 'Nuclear Powers boost all effects of gaining Particles.',
             unl: () => { return player.sacrifice.upgs.includes(34) & player.nuclear.upgs.includes(22) },
             cost: () => { return E(1e35) },
             cur: () => { return player.nuclear.stats.add(1).log10().add(1) },
             curDesc: (x) => { return 'x'+notate(x) },
         },
         35: {
-            desc: 'Sacrifice Stats boost all pre-Sacrifice productions.',
+            desc: 'Sacrifice Stats boost all pre-Sacrifice production.',
             unl: () => { return player.sacrifice.upgs.includes(34) & player.nuclear.upgs.includes(22) },
             cost: () => { return E(1e36) },
             cur: () => { return player.sacrifice.stats.add(1).log10().add(1) },
@@ -505,7 +505,7 @@ const UPGRADE = {
             curDesc: (x) => { return notate(x)+'x' },
         },
         12: {
-            desc: 'Multiply Preon production based on Prestige Stat.',
+            desc: 'Multiply Preon production based on Prestige stats.',
             unl: () => { return true },
             cost: () => { return E(1e4) },
             cur: () => { return player.prestige.stats.add(1).log10().add(1) },
@@ -545,7 +545,7 @@ const UPGRADE = {
             curDesc: (x) => { return notate(x)+'x' },
         },
         24: {
-            desc: 'Gain 1% Sacrifice Points/s.',
+            desc: 'Gain 1% of your current Sacrifice points per second.',
             unl: () => { return player.preons.upgs.includes(14) },
             cost: () => { return E(1e9) },
         },
@@ -555,12 +555,12 @@ const UPGRADE = {
             cost: () => { return E(2.5e9) },
         },
         32: {
-            desc: '1st Sacrifice upgrade formula is better.',
+            desc: 'Sacrifice upgrade 1 formula is better.',
             unl: () => { return player.preons.upgs.includes(24) },
             cost: () => { return E(5e9) },
         },
         33: {
-            desc: 'Highest Merge Tier boost Preons gain.',
+            desc: 'Highest Merger Tier boost Preons gain.',
             unl: () => { return player.preons.upgs.includes(24) },
             cost: () => { return E(1e10) },
             cur: () => { return E(player.bestMergeLevel).add(1).pow(0.75) },
@@ -586,7 +586,7 @@ const UPGRADE = {
             curDesc: (x) => { return notate(x)+'x' },
         },
         35: {
-            desc: 'Preons boost all Pre-Sacrifice productions.',
+            desc: 'Preons boost all pre-Sacrifice production.',
             unl: () => { return player.preons.upgs.includes(33) & player.nuclear.upgs.includes(15) },
             cost: () => { return E(1e32) },
             cur: () => { return player.preons.stats.add(1).pow(1/8) },
@@ -595,7 +595,7 @@ const UPGRADE = {
     },
     atom_merges: {
         0: {
-            desc: 'Atom-Mergers spawn 1 Tier higher.',
+            desc: 'Atom Mergers spawn 1 Tier higher.',
             level: () => { return player.minAtomMergeLevel },
             cost: () => { return E(2+(player.minAtomMergeLevel-1)/25).pow(player.minAtomMergeLevel) },
             buy: () => {
@@ -612,14 +612,14 @@ const UPGRADE = {
         row: 5,
         col: 2,
         11: {
-            desc: 'Atoms boost Atom Dusts.',
+            desc: 'Atoms boost Atom Dust.',
             unl: () => { return true },
             cost: () => { return E(5) },
             cur: () => { return player.atoms.points.add(1).log10().add(1) },
             curDesc: (x) => { return notate(x)+'x' },
         },
         12: {
-            desc: 'Nuclear Power Chance is multiplied based on number of times atomized.',
+            desc: 'Nuclear Power Chance is multiplied based on number of times Atomized.',
             unl: () => { return true },
             cost: () => { return E(10) },
             cur: () => { return player.atoms.stats.add(1).log10().add(1) },
@@ -633,12 +633,12 @@ const UPGRADE = {
             curDesc: (x) => { return notate(x)+'x' },
         },
         14: {
-            desc: 'Gain 100% Atoms, and Atomizes based on Atoms.',
+            desc: 'Per second, gain 100% of Atoms gained on Atomize, and gain Atomize stats based on Atoms gained on Atomize.',
             unl: () => { return true },
             cost: () => { return E(50) },
         },
         15: {
-            desc: 'Unlock 3 more preon upgrades.',
+            desc: 'Unlock 3 more Preon upgrades.',
             unl: () => { return true },
             cost: () => { return E(100) },
         },
@@ -675,8 +675,8 @@ const CHALLENGES = {
     row: 2,
     11: {
         title: 'Non-Prestige',
-        desc: 'You cannot gain Prestige.',
-        reward: 'Numbers boost Prestige gain.',
+        desc: 'You cannot gain Prestige points.',
+        reward: 'Numbers boost Prestige point gain.',
         goal: E(1e36),
         unl: () => { return true },
         cur: () => { return player.number.add(1).log10().add(1).pow(0.4) },
@@ -684,16 +684,16 @@ const CHALLENGES = {
     },
     12: {
         title: 'Non-Energy',
-        desc: 'You cannot gain Energy.',
-        reward: 'Numbers boost Energy gain.',
+        desc: 'You cannot gain Energy points.',
+        reward: 'Numbers boost Energy point gain.',
         goal: E(1e64),
         unl: () => { return true },
         cur: () => { return player.number.add(1).log10().add(1).pow(0.6) },
         curDesc: (x) => { return notate(x)+'x' },
     },
     21: {
-        title: 'Number-Divison',
-        desc: 'Divide Merges production based on Numbers.',
+        title: 'Number Divison',
+        desc: 'Divide Merger production based on Numbers.',
         reward: 'Numbers boost Merges production.',
         goal: E(1e45),
         unl: () => { return player.chalCompleted.includes(11) & player.chalCompleted.includes(12) },
@@ -701,8 +701,8 @@ const CHALLENGES = {
         curDesc: (x) => { return notate(x)+'x' },
     },
     22: {
-        title: 'Lower-Points',
-        desc: 'Raise all pre-Sacrifice productions by 0.5.',
+        title: 'Lower Points',
+        desc: 'Raise all pre-Sacrifice production by 0.5.',
         reward: 'Numbers boost Preons gain.',
         goal: E(1e20),
         unl: () => { return player.chalCompleted.includes(11) & player.chalCompleted.includes(12) },
@@ -711,8 +711,8 @@ const CHALLENGES = {
     },
     31: {
         title: 'Non-Merge',
-        desc: 'You cannot merge mergers (like Non-Energy).',
-        reward: 'Every time you merge, you have a chance based on your number go up by 2 instead of one for the same price.',
+        desc: 'You cannot merge Mergers (like Non-Energy).',
+        reward: 'Every time you merge, you have a chance (based on your number) to raise the tier by 2 instead of 1.',
         goal: E(1e125),
         unl: () => { return player.preons.upgs.includes(31) },
         cur: () => { return player.number.add(1).log10().add(1).logBase(2) },
@@ -733,7 +733,7 @@ const ACHIEVEMENTS = {
     },
     effs: {
         0: {
-            desc: 'Highest Merge level, every 10 will merge effects has added 2.5% stronger (capped at 100%).',
+            desc: 'Highest Merger level. Every 10 levels will increase merge effects by 2.5% (capped at 100%).',
             best: () => { return player.bestMergeLevel },
             cur: () => { return Math.min(Math.floor(player.bestMergeLevel/10)*0.025, 1) },
             curDesc: (x) => { return notate(x*100,1) + '%' }, 
@@ -832,7 +832,7 @@ function resetAtom() {
 
 function atomize() {
     if (FORMULA.atoms_gain().gte(1)) {
-        if (player.atoms.stats.gte(ATOMS.milestones[22].req)?true:confirm('Are you really atomize? Reset all previous progress to gain Atoms! Ready?')) {
+        if (player.atoms.stats.gte(ATOMS.milestones[22].req)?true:confirm('Are you sure you want to Atomize? This will reset all previous progress and you will gain Atoms.')) {
             resetAtom()
         }
     }
@@ -863,7 +863,7 @@ function addMerge() {
     }
 }
 
-function addAtomMerge() {
+function addAtomMerger() {
     if (player.atoms.points.gte(1) && FORMULA.atom_merges_have(player.atom_merges) < 20) {
         player.atoms.points = player.atoms.points.sub(1)
         for (let i = 0; i < player.atom_merges.length; i++) if (player.atom_merges[i][0] == 0) {
@@ -930,7 +930,7 @@ function atom_mergeALL() {
 }
 
 function recycleAtoms() {
-    if (FORMULA.recycle_atoms().gt(0)) if (confirm('Are you really recycle all Atom-Mergers?')) {
+    if (FORMULA.recycle_atoms().gt(0)) if (confirm('Are you sure you want to recycle all of your Atom Mergers?')) {
         player.atoms.points = player.atoms.points.add(FORMULA.recycle_atoms())
         for (let i = 0; i < player.atom_merges.length; i++) player.atom_merges[i][0] = 0
     }

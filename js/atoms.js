@@ -27,12 +27,12 @@ const ATOMS = {
     desc: [
         'gives more Numbers.',
         'gives more Prestige points.',
-        'gives more Energy, and boosts Energy chances to gain.',
+        'gives more Energy points, and boosts Energy point gain chance.',
         'gives more Sacrifice points.',
-        "gives more Preons, and boosts it's effect.",
-        'gives more Merge space. (max 30)',
-        'gives a chance that when a Merge spawns, spawns with +1 tier.',
-        'gives a chance that when merging, the result spawns 1 tier higher 1+1 = 3.',
+        "gives more Preons, and boosts their effect.",
+        'gives more Merger space. (max 30)',
+        'gives a chance that a Merger will spawn with +1 tier.',
+        'gives a chance that merging will give a result 1 tier higher than the total.',
     ],
     cur: [
         [[() => { return player.atoms.dusts.red.add(1).pow(1.25) }, (x) => { return 'x'+notate(x) }], false],
@@ -60,7 +60,7 @@ const ATOMS = {
             req: E(4),
         },
         21: {
-            desc: 'Keep Prestige & Energy on Atomize (instead of 4 & 5 Sacrifice upgrades).',
+            desc: 'Keep Prestige & Energy on Atomize (instead of Sacrifice upgrades 4 & 5).',
             req: E(9),
         },
         22: {
@@ -76,19 +76,19 @@ const ATOMS = {
             req: E(36),
         },
         32: {
-            desc: 'Start with Energy unlocked (100 Energy stats).',
+            desc: 'Start with Energy unlocked (100 Energy points).',
             req: E(100),
         },
         33: {
-            desc: 'Unlock Nucelar.',
+            desc: 'Unlock Nuclear.',
             req: E(1e3),
         },
         41: {
-            desc: 'Unlock Auto Atom-Merge (buy new Auto-Merger & Auto-Merge).',
+            desc: 'Unlock Auto Atom Merge (buy new Auto-Merger & Auto-Merge).',
             req: E(1e4),
         },
         42: {
-            desc: 'Unlock Uranium on Nuclear.',
+            desc: 'Unlock Uranium gain on Nuclear.',
             req: E(1e5),
         },
         43: {
